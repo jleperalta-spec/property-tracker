@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helen's Property Tracker</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* LOGIN */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 24px;
+    }
+    #login-screen h1 { font-size: 1.8rem; }
+    #login-screen p { color: #666; font-size: 0.95rem; }
+    #signin-btn {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px; border: 1px solid #ddd; border-radius: 6px;
+      background: white; cursor: pointer; font-size: 0.95rem; color: #444;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #signin-btn:hover { background: #f9f9f9; }
+
+    /* APP */
+    #app { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px;
+    }
+    header h1 { font-size: 1.5rem; }
+    #user-email { font-size: 0.85rem; color: #666; }
+    #sign-out-btn {
+      background: none; border: 1px solid #ccc; border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-size: 0.85rem; color: #444;
+    }
+    #sign-out-btn:hover { background: #eee; }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white; border-radius: 12px; padding: 16px 18px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    .stat-card .label { font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-card .value { font-size: 1.3rem; font-weight: 700; }
+    .stat-card.green .value { color: #38a169; }
+    .stat-card.red .value { color: #e53e3e; }
+
+    /* VIEW TABS */
+    .view-tabs {
+      display: flex; gap: 4px; margin-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    .view-tab {
+      padding: 8px 20px; border: none; background: none;
+      cursor: pointer; font-size: 0.9rem; color: #666;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+    }
+    .view-tab.active { color: #3182ce; border-bottom-color: #3182ce; font-weight: 600; }
+    .view-tab:hover:not(.active) { color: #333; }
+
+    /* YEAR TABS */
+    .year-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .year-tab {
+      padding: 6px 16px; border-radius: 20px; border: 1px solid #ddd;
+      background: white; cursor: pointer; font-size: 0.85rem; color: #666;
+    }
+    .year-tab.active { background: #1a1a2e; color: white; border-color: #1a1a2e; font-weight: 600; }
+    .year-tab.archived { color: #aaa; font-style: italic; }
+    .year-tab.archived.active { background: #718096; border-color: #718096; color: white; font-style: italic; }
+
+    /* BUILDING SUMMARY CARDS */
+    .building-summary {
+      background: white; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .building-title {
+      padding: 14px 20px;
+      font-size: 1rem; font-weight: 700;
+      background: #f7f8fa;
+      border-bottom: 1px solid #eee;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #2d3748;
+    }
+    .summary-table-wrapper { overflow-x: auto; }
+    .summary-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+    .summary-table thead th {
+      padding: 8px 12px; text-align: center;
+      font-size: 0.75rem; color: #999;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      background: #fafafa; border-bottom: 1px solid #eee;
+      white-space: nowrap;
+    }
+    .summary-table thead th:first-child,
+    .summary-table thead th:nth-child(2) { text-align: left; }
+
+    .summary-table tbody td {
+      padding: 9px 12px; text-align: center;
+      border-top: 1px solid #f5f5f5;
+    }
+    .summary-table tbody td:first-child { text-align: left; font-weight: 600; color: #2d3748; }
+    .summary-table tbody td:nth-child(2) { text-align: left; color: #888; font-size: 0.78rem; }
+
+    .cell-paid { background: #f0fff4; color: #276749; font-weight: 600; }
+    .cell-flagged { background: #fff5f5; color: #c53030; font-weight: 600; cursor: help; }
+    .cell-unknown { background: #fffbeb; color: #b7791f; font-style: italic; }
+    .cell-empty { color: #ccc; }
+    .cell-future { opacity: 0.35; }
+
+    .totals-row td {
+      font-weight: 700; background: #f7f8fa;
+      border-top: 2px solid #e2e8f0 !important;
+      font-size: 0.82rem;
+    }
+    .totals-row td:first-child { color: #666; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* PAYMENT LOG */
+    #log-view { display: none; }
+    .filters {
+      display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .filters select, .filters input {
+      padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px;
+      font-size: 0.88rem; background: white; color: #333;
+    }
+    .table-wrapper {
+      background: white; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden;
+    }
+    table.log-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .log-table thead { background: #f7f8fa; }
+    .log-table thead th {
+      text-align: left; padding: 11px 14px;
+      font-size: 0.75rem; color: #999;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .log-table tbody tr { border-top: 1px solid #f0f0f0; }
+    .log-table tbody tr:hover { background: #fafafa; }
+    .log-table tbody td { padding: 10px 14px; vertical-align: middle; }
+    .log-table tr.flagged { background: #fff9f9; }
+    .log-table tr.flagged:hover { background: #fff5f5; }
+
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge.ok { background: #f0fff4; color: #38a169; }
+    .badge.anomaly { background: #fff5f5; color: #e53e3e; }
+    .building-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 6px;
+      font-size: 0.78rem; font-weight: 500; background: #ebf4ff; color: #3182ce;
+    }
+    .amount { font-weight: 600; }
+    .amount.negative { color: #e53e3e; }
+    .notes-cell { color: #888; font-size: 0.8rem; max-width: 200px; }
+
+    #loading { text-align: center; padding: 40px; color: #888; }
+    #error-msg { text-align: center; padding: 40px; color: #e53e3e; display: none; }
+
+    /* LEGEND */
+    .legend {
+      display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+      font-size: 0.8rem; color: #666;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot {
+      width: 12px; height: 12px; border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <h1>Helen's Property Tracker</h1>
+  <p>Sign in with your Google account to view payment records</p>
+  <button id="signin-btn" onclick="signIn()">
+    <img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20" />
+    Sign in with Google
+  </button>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div>
+      <h1>Helen's Property Tracker</h1>
+      <span id="user-email"></span>
+    </div>
+    <button id="sign-out-btn" onclick="signOut()">Sign out</button>
+  </header>
+
+  <div id="loading">Loading payment data...</div>
+  <div id="error-msg"></div>
+
+  <div id="main-content" style="display:none">
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Total Payments</div>
+        <div class="value" id="stat-total">—</div>
+      </div>
+      <div class="stat-card green">
+        <div class="label">Total Received (PHP)</div>
+        <div class="value" id="stat-received">—</div>
+      </div>
+      <div class="stat-card red">
+        <div class="label">Flagged / Anomalies</div>
+        <div class="value" id="stat-flagged">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Properties</div>
+        <div class="value" id="stat-properties">—</div>
+      </div>
+    </div>
+
+    <!-- VIEW TABS -->
+    <div class="view-tabs">
+      <button class="view-tab active" data-view="summary" onclick="showView('summary')">Monthly Summary</button>
+      <button class="view-tab" data-view="log" onclick="showView('log')">Payment Log</button>
+    </div>
+
+    <!-- MONTHLY SUMMARY VIEW -->
+    <div id="summary-view">
+      <div class="year-tabs" id="year-tabs"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#c6f6d5"></div> Paid</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fed7d7"></div> Flagged / Anomaly</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fefcbf"></div> Amount Unknown</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#eee"></div> No payment</div>
+      </div>
+      <div id="summary-content"></div>
+    </div>
+
+    <!-- PAYMENT LOG VIEW -->
+    <div id="log-view">
+      <div class="filters">
+        <select id="filter-building" onchange="applyFilters()">
+          <option value="">All Buildings</option>
+        </select>
+        <select id="filter-flagged" onchange="applyFilters()">
+          <option value="">All Records</option>
+          <option value="flagged">Flagged Only</option>
+          <option value="normal">Normal Only</option>
+        </select>
+        <select id="filter-year" onchange="applyFilters()">
+          <option value="">All Years</option>
+        </select>
+        <input type="text" id="filter-search" placeholder="Search property, notes..." oninput="applyFilters()" />
+      </div>
+      <div class="table-wrapper">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Building</th>
+              <th>Property</th>
+              <th>Type</th>
+              <th>Period</th>
+              <th>Months</th>
+              <th>Amount (PHP)</th>
+              <th>Account</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<script>
+  const CLIENT_ID = '223524951828-rrglgv01p1rb12g6a3r05ho7ejmqdpsg.apps.googleusercontent.com';
+  const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
+  const SHEET_RANGE = 'Helen_Rent_Payments!A1:P200';
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  let allRows = [];
+  let accessToken = null;
+  let selectedYear = 2026;
+
+  // ── AUTH ────────────────────────────────────────────────────────────────────
+
+  function signIn() {
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email',
+      callback: async (tokenResponse) => {
+        accessToken = tokenResponse.access_token;
+        const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const user = await userRes.json();
+        document.getElementById('user-email').textContent = user.email;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        fetchSheetData();
+      }
+    });
+    tokenClient.requestAccessToken();
+  }
+
+  function signOut() {
+    accessToken = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  // ── DATA ────────────────────────────────────────────────────────────────────
+
+  async function fetchSheetData() {
+    try {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_RANGE}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (!res.ok) throw new Error(`Failed to fetch sheet: ${res.status}`);
+      const data = await res.json();
+      const [headers, ...rows] = data.values;
+      allRows = rows.map(row => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = row[i] || '');
+        return obj;
+      });
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      renderStats(allRows);
+      buildYearTabs();
+      renderMonthlySummary();
+      populateLogFilters();
+      renderLogTable(allRows);
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'block';
+      document.getElementById('error-msg').textContent = 'Error loading data: ' + err.message;
+    }
+  }
+
+  // ── STATS ───────────────────────────────────────────────────────────────────
+
+  function renderStats(rows) {
+    const received = rows.reduce((s, r) => s + (parseFloat(r.amount_php) || 0), 0);
+    document.getElementById('stat-total').textContent = rows.length;
+    document.getElementById('stat-received').textContent = '₱' + Math.round(received).toLocaleString();
+    document.getElementById('stat-flagged').textContent = rows.filter(r => r.flagged).length;
+    document.getElementById('stat-properties').textContent = new Set(rows.map(r => r.property_id).filter(Boolean)).size;
+  }
+
+  // ── VIEW TABS ────────────────────────────────────────────────────────────────
+
+  function showView(view) {
+    document.getElementById('summary-view').style.display = view === 'summary' ? 'block' : 'none';
+    document.getElementById('log-view').style.display = view === 'log' ? 'block' : 'none';
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  }
+
+  // ── YEAR TABS ────────────────────────────────────────────────────────────────
+
+  function buildYearTabs() {
+    const years = [...new Set(allRows.map(r => r.date_sent?.slice(0,4)).filter(Boolean))]
+      .map(Number).sort((a,b) => b - a);
+
+    const container = document.getElementById('year-tabs');
+    container.innerHTML = years.map(y => {
+      const archived = y < 2026;
+      return `<button class="year-tab ${archived ? 'archived' : ''} ${y === selectedYear ? 'active' : ''}"
+        data-year="${y}" onclick="selectYear(${y})">
+        ${y}${archived ? ' — Archived' : ''}
+      </button>`;
+    }).join('');
+  }
+
+  function selectYear(year) {
+    selectedYear = year;
+    document.querySelectorAll('.year-tab').forEach(t =>
+      t.classList.toggle('active', parseInt(t.dataset.year) === year)
+    );
+    renderMonthlySummary();
+  }
+
+  // ── MONTHLY SUMMARY ──────────────────────────────────────────────────────────
+
+  function getPaymentMonths(row) {
+    if (!row.period_start) return [];
+    const count = parseInt(row.months_covered) || 1;
+    const [y, m] = row.period_start.split('-').map(Number);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const d = new Date(y, m - 1 + i, 1);
+      result.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    }
+    return result;
+  }
+
+  function buildSummaryData() {
+    const data = {};
+    allRows.forEach(row => {
+      if (!row.building || !row.property_id) return;
+      const monthKeys = getPaymentMonths(row);
+      if (!monthKeys.length) return;
+
+      const totalAmt = row.amount_php !== '' ? parseFloat(row.amount_php) : null;
+      const perMonth = totalAmt !== null ? totalAmt / monthKeys.length : null;
+      const isUnknown = row.flagged === 'AMOUNT UNKNOWN';
+
+      if (!data[row.building]) data[row.building] = {};
+      if (!data[row.building][row.property_id]) {
+        data[row.building][row.property_id] = { type: row.property_type, months: {} };
+      }
+
+      monthKeys.forEach(mk => {
+        if (!data[row.building][row.property_id].months[mk]) {
+          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [] };
+        }
+        const cell = data[row.building][row.property_id].months[mk];
+        if (isUnknown) cell.unknown = true;
+        else if (perMonth !== null) cell.amount += perMonth;
+        if (row.flagged && !isUnknown) cell.flagged = row.flagged;
+        if (row.deduction_notes) cell.notes.push('Deductions: ' + row.deduction_notes);
+        if (row.notes) cell.notes.push('Notes: ' + row.notes);
+      });
+    });
+    return data;
+  }
+
+  function renderMonthlySummary() {
+    const container = document.getElementById('summary-content');
+    const data = buildSummaryData();
+    const today = new Date();
+
+    const monthCols = Array.from({length: 12}, (_, i) => ({
+      key: `${selectedYear}-${String(i+1).padStart(2,'0')}`,
+      label: MONTHS[i],
+      isFuture: new Date(selectedYear, i, 1) > today
+    }));
+
+    const buildings = Object.keys(data).sort();
+
+    container.innerHTML = buildings.map(building => {
+      const properties = Object.keys(data[building]).sort();
+
+      const bodyRows = properties.map(propId => {
+        const prop = data[building][propId];
+        const cells = monthCols.map(col => {
+          const cell = prop.months[col.key];
+          const futureCls = col.isFuture ? ' cell-future' : '';
+          if (!cell) return `<td class="cell-empty${futureCls}">—</td>`;
+          if (cell.unknown) return `<td class="cell-unknown${futureCls}" title="Amount not captured">?</td>`;
+          if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">—</td>`;
+          const amt = '₱' + Math.round(cell.amount).toLocaleString();
+          const tip = cell.notes.length ? ` title="${cell.notes.filter(Boolean).join(' | ')}"` : '';
+          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}</td>`;
+          return `<td class="cell-paid${futureCls}"${tip}>${amt}</td>`;
+        }).join('');
+
+        return `<tr>
+          <td>${propId}</td>
+          <td>${prop.type || '—'}</td>
+          ${cells}
+        </tr>`;
+      }).join('');
+
+      const totalCells = monthCols.map(col => {
+        let total = 0; let hasAny = false; let hasUnknown = false;
+        properties.forEach(p => {
+          const cell = data[building][p].months[col.key];
+          if (cell) { hasAny = true; total += cell.amount; if (cell.unknown) hasUnknown = true; }
+        });
+        const futureCls = col.isFuture ? ' cell-future' : '';
+        if (!hasAny) return `<td class="cell-empty${futureCls}">—</td>`;
+        if (hasUnknown && total === 0) return `<td class="cell-unknown${futureCls}">?</td>`;
+        return `<td${futureCls ? ` class="${futureCls.trim()}"` : ''}>₱${Math.round(total).toLocaleString()}</td>`;
+      }).join('');
+
+      return `<div class="building-summary">
+        <div class="building-title">${building}</div>
+        <div class="summary-table-wrapper">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th style="text-align:left">Property</th>
+                <th style="text-align:left">Type</th>
+                ${monthCols.map(c => `<th class="${c.isFuture ? 'cell-future' : ''}">${c.label}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${bodyRows}
+              <tr class="totals-row">
+                <td colspan="2">Total</td>
+                ${totalCells}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── PAYMENT LOG ──────────────────────────────────────────────────────────────
+
+  function populateLogFilters() {
+    const buildings = [...new Set(allRows.map(r => r.building).filter(Boolean))].sort();
+    const years = [...new Set(allRows.map(r => r.date_sent?.slice(0,4)).filter(Boolean))].sort();
+    const bSel = document.getElementById('filter-building');
+    buildings.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; bSel.appendChild(o); });
+    const ySel = document.getElementById('filter-year');
+    years.forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; ySel.appendChild(o); });
+  }
+
+  function applyFilters() {
+    const building = document.getElementById('filter-building').value;
+    const flagged  = document.getElementById('filter-flagged').value;
+    const year     = document.getElementById('filter-year').value;
+    const search   = document.getElementById('filter-search').value.toLowerCase();
+    const filtered = allRows.filter(r => {
+      if (building && r.building !== building) return false;
+      if (flagged === 'flagged' && !r.flagged) return false;
+      if (flagged === 'normal' && r.flagged) return false;
+      if (year && !r.date_sent?.startsWith(year)) return false;
+      if (search) {
+        const hay = [r.building, r.property_id, r.notes, r.flagged, r.from_account].join(' ').toLowerCase();
+        if (!hay.includes(search)) return false;
+      }
+      return true;
+    });
+    renderLogTable(filtered);
+  }
+
+  function renderLogTable(rows) {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = rows.map(r => {
+      const amount = parseFloat(r.amount_php) || 0;
+      const period = r.period_start && r.period_end ? `${r.period_start} → ${r.period_end}` : '—';
+      const badge = r.flagged
+        ? `<span class="badge anomaly" title="${r.flagged}">${r.flagged.length > 20 ? 'ANOMALY' : r.flagged}</span>`
+        : `<span class="badge ok">OK</span>`;
+      return `<tr class="${r.flagged ? 'flagged' : ''}">
+        <td>${r.date_sent || '—'}</td>
+        <td>${r.building ? `<span class="building-tag">${r.building}</span>` : '<span style="color:#ccc">—</span>'}</td>
+        <td>${r.property_id || '—'}</td>
+        <td>${r.property_type || '—'}</td>
+        <td style="font-size:0.78rem;color:#888">${period}</td>
+        <td style="text-align:center">${r.months_covered || '1'}</td>
+        <td class="amount ${amount < 0 ? 'negative' : ''}">₱${amount.toLocaleString('en-PH', {minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td>${r.from_account || '—'}</td>
+        <td>${r.payment_method || '—'}</td>
+        <td>${badge}</td>
+        <td class="notes-cell">${r.notes || r.deduction_notes || '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+</script>
+</body>
+</html>
