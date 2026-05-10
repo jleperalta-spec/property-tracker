@@ -343,18 +343,21 @@
   const CLIENT_ID = '223524951828-rrglgv01p1rb12g6a3r05ho7ejmqdpsg.apps.googleusercontent.com';
   const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
   const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
+  const DRIVE_FOLDER_ID = '1MhSVSExJBfy-4pBSTPebSSb2I6D_xKQA';
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
   let accessToken = null;
   let selectedYear = 2026;
+  let driveFileMap = {};
+  let blobUrlCache = {};
 
   // ── AUTH ────────────────────────────────────────────────────────────────────
 
   function signIn() {
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/userinfo.email',
+      scope: 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email',
       callback: async (tokenResponse) => {
         accessToken = tokenResponse.access_token;
         const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -364,6 +367,7 @@
         document.getElementById('user-email').textContent = user.email;
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'block';
+        loadDriveFiles();
         fetchSheetData();
       }
     });
@@ -476,7 +480,7 @@
         data[row.building][row.property_id] = { type: row.property_type, months: {} };
       }
 
-      const imgUrls = row.source_images ? row.source_images.split(',').map(s => resolveImgUrl(s)).filter(Boolean) : [];
+      const imgUrls = row.source_images ? row.source_images.split(',').map(s => s.trim()).filter(Boolean) : [];
 
       monthKeys.forEach(mk => {
         if (!data[row.building][row.property_id].months[mk]) {
@@ -601,14 +605,55 @@
     renderLogTable(filtered);
   }
 
+  // ── DRIVE ────────────────────────────────────────────────────────────────────
+
+  async function loadDriveFiles() {
+    try {
+      const q = encodeURIComponent(`'${DRIVE_FOLDER_ID}' in parents and trashed=false`);
+      const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=1000`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const data = await res.json();
+      driveFileMap = {};
+      (data.files || []).forEach(f => { driveFileMap[f.name.toLowerCase()] = f.id; });
+    } catch (err) {
+      console.warn('Could not load Drive files:', err);
+    }
+  }
+
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
 
-  function openImgModal(url, caption) {
-    document.getElementById('img-modal-img').src = url;
-    document.getElementById('img-modal-caption').textContent = caption || '';
-    document.getElementById('img-modal').classList.add('open');
+  async function openImgModal(raw, caption) {
+    const modal = document.getElementById('img-modal');
+    const img   = document.getElementById('img-modal-img');
+    const cap   = document.getElementById('img-modal-caption');
+    img.src = '';
+    cap.textContent = 'Loading…';
+    modal.classList.add('open');
+
+    let src = raw;
+    if (!raw.startsWith('http://') && !raw.startsWith('https://')) {
+      const fileId = driveFileMap[raw.toLowerCase()];
+      if (!fileId) { cap.textContent = 'Image not found in Drive.'; return; }
+      if (blobUrlCache[fileId]) {
+        src = blobUrlCache[fileId];
+      } else {
+        try {
+          const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          const blob = await res.blob();
+          src = URL.createObjectURL(blob);
+          blobUrlCache[fileId] = src;
+        } catch (e) {
+          cap.textContent = 'Failed to load image.';
+          return;
+        }
+      }
+    }
+    img.src = src;
+    cap.textContent = caption || '';
   }
 
   function closeImgModal(e) {
@@ -617,22 +662,15 @@
     document.getElementById('img-modal-img').src = '';
   }
 
-  function resolveImgUrl(raw) {
-    if (!raw) return '';
-    raw = raw.trim();
-    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-    return 'Rent/' + raw;
-  }
-
   function renderImgBtn(row, label) {
     if (!row.source_images) return '—';
-    const urls = row.source_images.split(',').map(s => resolveImgUrl(s)).filter(Boolean);
-    return urls.map((url, i) => {
-      const cap = label ? `${label} — receipt ${urls.length > 1 ? i+1 : ''}`.trim() : '';
-      const safeUrl = url.replace(/'/g, "\\'");
+    const raws = row.source_images.split(',').map(s => s.trim()).filter(Boolean);
+    return raws.map((raw, i) => {
+      const cap = label ? `${label}${raws.length > 1 ? ` — receipt ${i+1}` : ''}` : '';
+      const safeRaw = raw.replace(/'/g, "\\'");
       const safeCap = cap.replace(/'/g, "\\'");
-      return `<button class="img-btn" onclick="openImgModal('${safeUrl}','${safeCap}')">
-        ${urls.length > 1 ? `View ${i+1}` : 'View'}
+      return `<button class="img-btn" onclick="openImgModal('${safeRaw}','${safeCap}')">
+        ${raws.length > 1 ? `View ${i+1}` : 'View'}
       </button>`;
     }).join(' ');
   }
