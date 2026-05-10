@@ -211,6 +211,28 @@
       padding: 2px 8px; cursor: pointer; font-size: 0.75rem; color: #3182ce;
     }
     .img-btn:hover { background: #ebf8ff; }
+    .receipt-btn {
+      display: inline-block; margin-top: 4px;
+      padding: 2px 7px; font-size: 0.7rem; font-weight: 600;
+      background: white; color: #3182ce;
+      border: 1px solid #90cdf4; border-radius: 5px;
+      box-shadow: 0 2px 0 #63b3ed;
+      cursor: pointer; user-select: none;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    .receipt-btn:hover { background: #ebf8ff; }
+    .receipt-btn:active { box-shadow: none; transform: translateY(2px); }
+    .flag-btn {
+      display: inline-block; margin-top: 2px;
+      padding: 2px 7px; font-size: 0.7rem; font-weight: 600;
+      background: white; color: #c05621;
+      border: 1px solid #fbd38d; border-radius: 5px;
+      box-shadow: 0 2px 0 #f6ad55;
+      cursor: pointer; user-select: none;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    .flag-btn:hover { background: #fffaf0; }
+    .flag-btn:active { box-shadow: none; transform: translateY(2px); }
 
     /* LEGEND */
     .legend {
@@ -343,7 +365,7 @@
   const CLIENT_ID = '223524951828-rrglgv01p1rb12g6a3r05ho7ejmqdpsg.apps.googleusercontent.com';
   const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
   const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
-  const DRIVE_FOLDER_ID = '1MhSVSExJBfy-4pBSTPebSSb2I6D_xKQA';
+  const DRIVE_FOLDER_ID = '16sSUzdAB2DxafPNsHie20VQqdMhCRFuw';
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
@@ -396,8 +418,8 @@
       });
       document.getElementById('loading').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
-      renderStats(allRows);
       buildYearTabs();
+      renderStats(allRows.filter(r => r.date_sent?.startsWith(String(selectedYear))));
       renderMonthlySummary();
       populateLogFilters();
       renderLogTable(allRows);
@@ -447,6 +469,7 @@
     document.querySelectorAll('.year-tab').forEach(t =>
       t.classList.toggle('active', parseInt(t.dataset.year) === year)
     );
+    renderStats(allRows.filter(r => r.date_sent?.startsWith(String(year))));
     renderMonthlySummary();
   }
 
@@ -455,7 +478,20 @@
   function getPaymentMonths(row) {
     if (!row.period_start) return [];
     const count = parseInt(row.months_covered) || 1;
-    const [y, m] = row.period_start.split('-').map(Number);
+    let [y, m, startDay] = row.period_start.split('-').map(Number);
+
+    // If the start day is past the month's midpoint, the majority of the first
+    // billing segment falls in the next calendar month — shift there.
+    // e.g. Mar 20–May 19 (2 months) → Apr + May; Jan 31–Feb 28 → Feb.
+    const lastDayOfStartMonth = new Date(y, m, 0).getDate();
+    const daysRemainingInStart = lastDayOfStartMonth - startDay + 1;
+    const daysInNextMonth = startDay - 1;
+    if (daysInNextMonth > daysRemainingInStart) {
+      const next = new Date(y, m, 1);
+      y = next.getFullYear();
+      m = next.getMonth() + 1;
+    }
+
     const result = [];
     for (let i = 0; i < count; i++) {
       const d = new Date(y, m - 1 + i, 1);
@@ -480,7 +516,7 @@
         data[row.building][row.property_id] = { type: row.property_type, months: {} };
       }
 
-      const imgUrls = row.source_images ? row.source_images.split(',').map(s => s.trim()).filter(Boolean) : [];
+      const imgUrls = row.source_image ? row.source_image.split(',').map(s => s.trim()).filter(Boolean) : [];
 
       monthKeys.forEach(mk => {
         if (!data[row.building][row.property_id].months[mk]) {
@@ -519,17 +555,17 @@
         const cells = monthCols.map(col => {
           const cell = prop.months[col.key];
           const futureCls = col.isFuture ? ' cell-future' : '';
-          if (!cell) return `<td class="cell-empty${futureCls}">—</td>`;
+          const emptyContent = col.isFuture ? '—' : '<button class="flag-btn">Flag</button>';
+          if (!cell) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           if (cell.unknown) return `<td class="cell-unknown${futureCls}" title="Amount not captured">?</td>`;
-          if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">—</td>`;
+          if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           const amt = '₱' + Math.round(cell.amount).toLocaleString();
           const tip = cell.notes.length ? ` title="${cell.notes.filter(Boolean).join(' | ')}"` : '';
-          const imgClick = cell.images.length
-            ? ` style="cursor:pointer" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}')" title="${cell.images.length > 1 ? cell.images.length+' receipts — click to view first' : 'Click to view receipt'}"`
-            : tip;
-          const indicator = cell.images.length ? ' <span style="font-size:0.65rem;opacity:0.7">&#128247;</span>' : '';
-          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${cell.images.length ? imgClick : tip}>${amt}${indicator}</td>`;
-          return `<td class="cell-paid${futureCls}"${cell.images.length ? imgClick : tip}>${amt}${indicator}</td>`;
+          const receiptBtn = cell.images.length
+            ? `<br><button class="receipt-btn" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}')">Receipt</button>`
+            : '';
+          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}${receiptBtn}</td>`;
+          return `<td class="cell-paid${futureCls}"${tip}>${amt}${receiptBtn}</td>`;
         }).join('');
 
         return `<tr>
@@ -663,8 +699,8 @@
   }
 
   function renderImgBtn(row, label) {
-    if (!row.source_images) return '—';
-    const raws = row.source_images.split(',').map(s => s.trim()).filter(Boolean);
+    if (!row.source_image) return '—';
+    const raws = row.source_image.split(',').map(s => s.trim()).filter(Boolean);
     return raws.map((raw, i) => {
       const cap = label ? `${label}${raws.length > 1 ? ` — receipt ${i+1}` : ''}` : '';
       const safeRaw = raw.replace(/'/g, "\\'");
