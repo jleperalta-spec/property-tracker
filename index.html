@@ -180,6 +180,38 @@
     #loading { text-align: center; padding: 40px; color: #888; }
     #error-msg { text-align: center; padding: 40px; color: #e53e3e; display: none; }
 
+    /* IMAGE MODAL */
+    #img-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #img-modal.open { display: flex; }
+    #img-modal-inner {
+      position: relative; background: white; border-radius: 12px;
+      padding: 12px; max-width: 90vw; max-height: 90vh;
+      display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    #img-modal-close {
+      position: absolute; top: 8px; right: 10px;
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: #666; line-height: 1;
+    }
+    #img-modal-close:hover { color: #333; }
+    #img-modal-img {
+      max-width: 80vw; max-height: 80vh;
+      object-fit: contain; border-radius: 6px; display: block;
+    }
+    #img-modal-caption {
+      font-size: 0.8rem; color: #888; text-align: center;
+    }
+    .img-btn {
+      background: none; border: 1px solid #bee3f8; border-radius: 6px;
+      padding: 2px 8px; cursor: pointer; font-size: 0.75rem; color: #3182ce;
+    }
+    .img-btn:hover { background: #ebf8ff; }
+
     /* LEGEND */
     .legend {
       display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
@@ -287,6 +319,7 @@
               <th>Method</th>
               <th>Status</th>
               <th>Notes</th>
+              <th>Receipt</th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
@@ -297,10 +330,19 @@
   </div><!-- /main-content -->
 </div><!-- /app -->
 
+<!-- IMAGE MODAL -->
+<div id="img-modal" onclick="closeImgModal(event)">
+  <div id="img-modal-inner">
+    <button id="img-modal-close" onclick="closeImgModal()">&times;</button>
+    <img id="img-modal-img" src="" alt="Receipt" />
+    <div id="img-modal-caption"></div>
+  </div>
+</div>
+
 <script>
   const CLIENT_ID = '223524951828-rrglgv01p1rb12g6a3r05ho7ejmqdpsg.apps.googleusercontent.com';
   const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
-  const SHEET_RANGE = 'Helen_Rent_Payments!A1:P200';
+  const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
@@ -434,9 +476,11 @@
         data[row.building][row.property_id] = { type: row.property_type, months: {} };
       }
 
+      const imgUrls = row.source_images ? row.source_images.split(',').map(s => resolveImgUrl(s)).filter(Boolean) : [];
+
       monthKeys.forEach(mk => {
         if (!data[row.building][row.property_id].months[mk]) {
-          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [] };
+          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [], images: [] };
         }
         const cell = data[row.building][row.property_id].months[mk];
         if (isUnknown) cell.unknown = true;
@@ -444,6 +488,7 @@
         if (row.flagged && !isUnknown) cell.flagged = row.flagged;
         if (row.deduction_notes) cell.notes.push('Deductions: ' + row.deduction_notes);
         if (row.notes) cell.notes.push('Notes: ' + row.notes);
+        imgUrls.forEach(u => { if (!cell.images.includes(u)) cell.images.push(u); });
       });
     });
     return data;
@@ -475,8 +520,12 @@
           if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">—</td>`;
           const amt = '₱' + Math.round(cell.amount).toLocaleString();
           const tip = cell.notes.length ? ` title="${cell.notes.filter(Boolean).join(' | ')}"` : '';
-          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}</td>`;
-          return `<td class="cell-paid${futureCls}"${tip}>${amt}</td>`;
+          const imgClick = cell.images.length
+            ? ` style="cursor:pointer" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}')" title="${cell.images.length > 1 ? cell.images.length+' receipts — click to view first' : 'Click to view receipt'}"`
+            : tip;
+          const indicator = cell.images.length ? ' <span style="font-size:0.65rem;opacity:0.7">&#128247;</span>' : '';
+          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${cell.images.length ? imgClick : tip}>${amt}${indicator}</td>`;
+          return `<td class="cell-paid${futureCls}"${cell.images.length ? imgClick : tip}>${amt}${indicator}</td>`;
         }).join('');
 
         return `<tr>
@@ -552,6 +601,42 @@
     renderLogTable(filtered);
   }
 
+  // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+
+  function openImgModal(url, caption) {
+    document.getElementById('img-modal-img').src = url;
+    document.getElementById('img-modal-caption').textContent = caption || '';
+    document.getElementById('img-modal').classList.add('open');
+  }
+
+  function closeImgModal(e) {
+    if (e && e.target !== document.getElementById('img-modal')) return;
+    document.getElementById('img-modal').classList.remove('open');
+    document.getElementById('img-modal-img').src = '';
+  }
+
+  function resolveImgUrl(raw) {
+    if (!raw) return '';
+    raw = raw.trim();
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return 'Rent/' + raw;
+  }
+
+  function renderImgBtn(row, label) {
+    if (!row.source_images) return '—';
+    const urls = row.source_images.split(',').map(s => resolveImgUrl(s)).filter(Boolean);
+    return urls.map((url, i) => {
+      const cap = label ? `${label} — receipt ${urls.length > 1 ? i+1 : ''}`.trim() : '';
+      const safeUrl = url.replace(/'/g, "\\'");
+      const safeCap = cap.replace(/'/g, "\\'");
+      return `<button class="img-btn" onclick="openImgModal('${safeUrl}','${safeCap}')">
+        ${urls.length > 1 ? `View ${i+1}` : 'View'}
+      </button>`;
+    }).join(' ');
+  }
+
   function renderLogTable(rows) {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = rows.map(r => {
@@ -572,6 +657,7 @@
         <td>${r.payment_method || '—'}</td>
         <td>${badge}</td>
         <td class="notes-cell">${r.notes || r.deduction_notes || '—'}</td>
+        <td>${renderImgBtn(r, `${r.property_id} ${r.date_sent}`)}</td>
       </tr>`;
     }).join('');
   }
