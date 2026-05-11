@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Helen's Property Tracker</title>
+  <title>Caalen's Property Payment Tracker</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,17 +22,44 @@
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      gap: 24px;
+      gap: 20px;
+      background: linear-gradient(145deg, #0f2d55 0%, #1565a8 55%, #4a9fd4 100%);
     }
-    #login-screen h1 { font-size: 1.8rem; }
-    #login-screen p { color: #666; font-size: 0.95rem; }
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 52px 56px;
+      max-width: 460px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+    }
+    .login-icon { font-size: 2.8rem; margin-bottom: 20px; }
+    .login-title {
+      font-size: 1.55rem; font-weight: 700; color: #1a1a2e;
+      line-height: 1.35; margin-bottom: 14px;
+    }
+    .login-subtitle {
+      font-size: 1rem; color: #718096;
+      line-height: 1.6; margin-bottom: 36px;
+    }
     #signin-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 20px; border: 1px solid #ddd; border-radius: 6px;
-      background: white; cursor: pointer; font-size: 0.95rem; color: #444;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      width: 100%; padding: 15px 20px;
+      border: 2px solid #e2e8f0; border-radius: 10px;
+      background: white; cursor: pointer;
+      font-size: 1rem; font-weight: 600; color: #2d3748;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.18s;
     }
-    #signin-btn:hover { background: #f9f9f9; }
+    #signin-btn:hover {
+      background: #f7fafc; border-color: #cbd5e0;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.13);
+      transform: translateY(-1px);
+    }
+    .login-footer {
+      font-size: 0.8rem; color: rgba(255,255,255,0.4); letter-spacing: 0.3px;
+    }
 
     /* APP */
     #app { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
@@ -234,6 +261,55 @@
     .flag-btn:hover { background: #fffaf0; }
     .flag-btn:active { box-shadow: none; transform: translateY(2px); }
 
+    /* UPLOAD MODAL */
+    #upload-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #upload-modal.open { display: flex; }
+    #upload-modal-inner {
+      position: relative; background: white; border-radius: 16px;
+      padding: 36px 40px; width: 420px; max-width: 95vw;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    }
+    #upload-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
+    #upload-modal-close {
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: #aaa; line-height: 1;
+    }
+    #upload-modal-close:hover { color: #333; }
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 0.78rem; font-weight: 600; color: #718096; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-row input {
+      width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0;
+      border-radius: 8px; font-size: 0.9rem; color: #2d3748;
+    }
+    .form-row input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+    .form-row input[readonly] { background: #f7fafc; color: #999; }
+    .form-row input[type="file"] { padding: 6px; }
+    #upload-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+    #upload-submit {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      background: #1a1a2e; color: white; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 3px 0 #0f3460;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    #upload-submit:hover { background: #16213e; }
+    #upload-submit:active { box-shadow: none; transform: translateY(3px); }
+    #upload-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    .delete-btn {
+      padding: 2px 8px; font-size: 0.75rem; font-weight: 600;
+      background: white; color: #c53030;
+      border: 1px solid #fed7d7; border-radius: 6px;
+      box-shadow: 0 2px 0 #fc8181;
+      cursor: pointer; user-select: none;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    .delete-btn:hover { background: #fff5f5; }
+    .delete-btn:active { box-shadow: none; transform: translateY(2px); }
+
     /* LEGEND */
     .legend {
       display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
@@ -249,19 +325,23 @@
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <h1>Helen's Property Tracker</h1>
-  <p>Sign in with your Google account to view payment records</p>
-  <button id="signin-btn" onclick="signIn()">
-    <img src="https://developers.google.com/identity/images/g-logo.png" width="20" height="20" />
-    Sign in with Google
-  </button>
+  <div class="login-card">
+    <div class="login-icon">🏠</div>
+    <h1 class="login-title">Welcome to your Rental Property Payment Tracker, Caalen!</h1>
+    <p class="login-subtitle">Your rental payment records, organized and easy to review.</p>
+    <button id="signin-btn" onclick="signIn()">
+      <img src="https://developers.google.com/identity/images/g-logo.png" width="22" height="22" />
+      Sign in with Google
+    </button>
+  </div>
+  <p class="login-footer">Secure access via Google Sign-In</p>
 </div>
 
 <!-- APP -->
 <div id="app">
   <header>
     <div>
-      <h1>Helen's Property Tracker</h1>
+      <h1>Caalen's Property Payment Tracker</h1>
       <span id="user-email"></span>
     </div>
     <button id="sign-out-btn" onclick="signOut()">Sign out</button>
@@ -341,7 +421,7 @@
               <th>Method</th>
               <th>Status</th>
               <th>Notes</th>
-              <th>Receipt</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
@@ -351,6 +431,23 @@
 
   </div><!-- /main-content -->
 </div><!-- /app -->
+
+<!-- UPLOAD MODAL -->
+<div id="upload-modal" onclick="closeUploadModal(event)">
+  <div id="upload-modal-inner">
+    <button id="upload-modal-close" onclick="closeUploadModal()">&times;</button>
+    <h2>Log Payment</h2>
+    <div class="form-row"><label>Property</label><input type="text" id="upload-property" readonly /></div>
+    <div class="form-row"><label>Date Sent</label><input type="date" id="upload-date-sent" /></div>
+    <div class="form-row"><label>Period Start</label><input type="date" id="upload-period-start" /></div>
+    <div class="form-row"><label>Period End</label><input type="date" id="upload-period-end" /></div>
+    <div class="form-row"><label>Months Covered</label><input type="number" id="upload-months" value="1" min="1" /></div>
+    <div class="form-row"><label>Amount (PHP)</label><input type="number" id="upload-amount" placeholder="0.00" step="0.01" min="0" /></div>
+    <div class="form-row"><label>Receipt Image</label><input type="file" id="upload-file" accept="image/*" /></div>
+    <div id="upload-error"></div>
+    <button id="upload-submit" onclick="submitUpload()">Save Payment</button>
+  </div>
+</div>
 
 <!-- IMAGE MODAL -->
 <div id="img-modal" onclick="closeImgModal(event)">
@@ -369,17 +466,20 @@
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
+  let sheetHeaders = [];
+  let sheetNumericId = null;
   let accessToken = null;
   let selectedYear = 2026;
   let driveFileMap = {};
   let blobUrlCache = {};
+  let uploadContext = {};
 
   // ── AUTH ────────────────────────────────────────────────────────────────────
 
   function signIn() {
     const tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email',
+      scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email',
       callback: async (tokenResponse) => {
         accessToken = tokenResponse.access_token;
         const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
@@ -411,11 +511,18 @@
       if (!res.ok) throw new Error(`Failed to fetch sheet: ${res.status}`);
       const data = await res.json();
       const [headers, ...rows] = data.values;
-      allRows = rows.map(row => {
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = row[i] || '');
+      sheetHeaders = headers;
+      allRows = rows.map((row, i) => {
+        const obj = { _rowIndex: i + 2 }; // 1-based, +1 for header row
+        headers.forEach((h, j) => obj[h] = row[j] || '');
         return obj;
       });
+      if (!sheetNumericId) {
+        const metaRes = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=sheets.properties`, { headers: { Authorization: `Bearer ${accessToken}` } });
+        const meta = await metaRes.json();
+        const sheet = (meta.sheets || []).find(s => s.properties.title === 'Helen_Rent_Payments');
+        if (sheet) sheetNumericId = sheet.properties.sheetId;
+      }
       document.getElementById('loading').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
       buildYearTabs();
@@ -555,7 +662,8 @@
         const cells = monthCols.map(col => {
           const cell = prop.months[col.key];
           const futureCls = col.isFuture ? ' cell-future' : '';
-          const emptyContent = col.isFuture ? '—' : '<button class="flag-btn">Flag</button>';
+          const safeB = building.replace(/'/g,"\\'"), safeP = propId.replace(/'/g,"\\'"), safePT = (prop.type||'').replace(/'/g,"\\'");
+          const emptyContent = col.isFuture ? '—' : `<button class="flag-btn" onclick="openUploadModal('${safeB}','${safeP}','${col.key}','${safePT}')">Flag</button>`;
           if (!cell) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           if (cell.unknown) return `<td class="cell-unknown${futureCls}" title="Amount not captured">?</td>`;
           if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
@@ -658,7 +766,7 @@
 
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImgModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); } });
 
   async function openImgModal(raw, caption) {
     const modal = document.getElementById('img-modal');
@@ -711,6 +819,129 @@
     }).join(' ');
   }
 
+  // ── UPLOAD MODAL ─────────────────────────────────────────────────────────────
+
+  function openUploadModal(building, propId, monthKey, propType) {
+    uploadContext = { building, propId, monthKey, propType };
+    document.getElementById('upload-property').value = `${building} — ${propId}`;
+    const [y, m] = monthKey.split('-').map(Number);
+    const lastDay = new Date(y, m, 0).getDate();
+    document.getElementById('upload-period-start').value = `${y}-${String(m).padStart(2,'0')}-01`;
+    document.getElementById('upload-period-end').value   = `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+    document.getElementById('upload-months').value = '1';
+    document.getElementById('upload-amount').value = '';
+    document.getElementById('upload-file').value = '';
+    document.getElementById('upload-date-sent').value = new Date().toISOString().split('T')[0];
+    document.getElementById('upload-error').style.display = 'none';
+    document.getElementById('upload-submit').textContent = 'Save Payment';
+    document.getElementById('upload-submit').disabled = false;
+    document.getElementById('upload-modal').classList.add('open');
+  }
+
+  function closeUploadModal(e) {
+    if (e && e.target !== document.getElementById('upload-modal')) return;
+    document.getElementById('upload-modal').classList.remove('open');
+  }
+
+  async function submitUpload() {
+    const file      = document.getElementById('upload-file').files[0];
+    const amount    = document.getElementById('upload-amount').value.trim();
+    const dateSent  = document.getElementById('upload-date-sent').value;
+    const pStart    = document.getElementById('upload-period-start').value;
+    const pEnd      = document.getElementById('upload-period-end').value;
+    const months    = document.getElementById('upload-months').value;
+    const errEl     = document.getElementById('upload-error');
+    const submitBtn = document.getElementById('upload-submit');
+
+    errEl.style.display = 'none';
+    if (!amount) { errEl.textContent = 'Please enter an amount.'; errEl.style.display = 'block'; return; }
+    if (!file)   { errEl.textContent = 'Please select an image.';  errEl.style.display = 'block'; return; }
+
+    submitBtn.textContent = 'Uploading…';
+    submitBtn.disabled = true;
+
+    try {
+      const fileId = await uploadToDrive(file);
+      driveFileMap[file.name.toLowerCase()] = fileId;
+
+      await appendToSheet({
+        building:      uploadContext.building,
+        property_id:   uploadContext.propId,
+        property_type: uploadContext.propType,
+        date_sent:     dateSent,
+        period_start:  pStart,
+        period_end:    pEnd,
+        months_covered: months,
+        amount_php:    amount,
+        source_image:  file.name,
+      });
+
+      document.getElementById('upload-modal').classList.remove('open');
+      await fetchSheetData();
+    } catch (err) {
+      errEl.textContent = 'Failed: ' + err.message;
+      errEl.style.display = 'block';
+      submitBtn.textContent = 'Save Payment';
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function uploadToDrive(file) {
+    const metadata = JSON.stringify({ name: file.name, parents: [DRIVE_FOLDER_ID] });
+    const form = new FormData();
+    form.append('metadata', new Blob([metadata], { type: 'application/json' }));
+    form.append('file', file);
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: form
+    });
+    if (!res.ok) throw new Error(`Drive upload error ${res.status}`);
+    return (await res.json()).id;
+  }
+
+  async function appendToSheet(rowData) {
+    const row = sheetHeaders.map(h => rowData[h] !== undefined ? String(rowData[h]) : '');
+    const range = encodeURIComponent('Helen_Rent_Payments!A:Z');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}:append?valueInputOption=USER_ENTERED`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [row] })
+    });
+    if (!res.ok) throw new Error(`Sheets append error ${res.status}`);
+  }
+
+  async function deletePayment(rowIndex, filename) {
+    if (!confirm('Delete this payment? This cannot be undone.')) return;
+    try {
+      if (filename) {
+        const fileId = driveFileMap[filename.toLowerCase()];
+        if (fileId) {
+          await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          delete driveFileMap[filename.toLowerCase()];
+          delete blobUrlCache[fileId];
+        }
+      }
+      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requests: [{ deleteDimension: { range: {
+          sheetId: sheetNumericId,
+          dimension: 'ROWS',
+          startIndex: rowIndex - 1,
+          endIndex: rowIndex
+        }}}]})
+      });
+      await fetchSheetData();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  }
+
   function renderLogTable(rows) {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = rows.map(r => {
@@ -731,7 +962,10 @@
         <td>${r.payment_method || '—'}</td>
         <td>${badge}</td>
         <td class="notes-cell">${r.notes || r.deduction_notes || '—'}</td>
-        <td>${renderImgBtn(r, `${r.property_id} ${r.date_sent}`)}</td>
+        <td style="white-space:nowrap">
+          ${renderImgBtn(r, `${r.property_id} ${r.date_sent}`)}
+          <button class="delete-btn" onclick="deletePayment(${r._rowIndex},'${(r.source_image||'').replace(/'/g,"\\'")}')">Delete</button>
+        </td>
       </tr>`;
     }).join('');
   }
