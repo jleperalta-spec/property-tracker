@@ -233,6 +233,36 @@
     #img-modal-caption {
       font-size: 0.8rem; color: #888; text-align: center;
     }
+    #img-modal-comments {
+      display: flex; flex-direction: column; gap: 8px;
+      padding-bottom: 12px; border-bottom: 1px solid #eee;
+    }
+    #img-modal-comments-label {
+      font-size: 0.75rem; font-weight: 600; color: #718096;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    #img-modal-comment {
+      width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0;
+      border-radius: 8px; font-size: 0.88rem; color: #2d3748;
+      font-family: inherit; resize: vertical; min-height: 60px;
+    }
+    #img-modal-comment:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+    #img-modal-save-btn {
+      padding: 4px 14px; font-size: 0.8rem; font-weight: 600;
+      background: white; color: #3182ce;
+      border: 1px solid #90cdf4; border-radius: 5px;
+      box-shadow: 0 2px 0 #63b3ed; cursor: pointer;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    #img-modal-save-btn:hover { background: #ebf8ff; }
+    #img-modal-save-btn:active { box-shadow: none; transform: translateY(2px); }
+    #img-modal-save-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    #img-modal-save-status { font-size: 0.78rem; color: #38a169; }
+    .cell-has-comments {
+      display: inline-block; width: 8px; height: 8px;
+      background: #ed8936; border-radius: 50%;
+      margin-left: 5px; vertical-align: middle;
+    }
     .img-btn {
       background: none; border: 1px solid #bee3f8; border-radius: 6px;
       padding: 2px 8px; cursor: pointer; font-size: 0.75rem; color: #3182ce;
@@ -453,6 +483,14 @@
 <div id="img-modal" onclick="closeImgModal(event)">
   <div id="img-modal-inner">
     <button id="img-modal-close" onclick="closeImgModal()">&times;</button>
+    <div id="img-modal-comments">
+      <label id="img-modal-comments-label">Notes &amp; Comments</label>
+      <textarea id="img-modal-comment" rows="3" placeholder="Add notes or comments..."></textarea>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="img-modal-save-btn" onclick="saveModalComment()">Save</button>
+        <span id="img-modal-save-status"></span>
+      </div>
+    </div>
     <img id="img-modal-img" src="" alt="Receipt" />
     <div id="img-modal-caption"></div>
   </div>
@@ -473,6 +511,7 @@
   let driveFileMap = {};
   let blobUrlCache = {};
   let uploadContext = {};
+  let modalRowIndex = null;
 
   // ── AUTH ────────────────────────────────────────────────────────────────────
 
@@ -627,7 +666,7 @@
 
       monthKeys.forEach(mk => {
         if (!data[row.building][row.property_id].months[mk]) {
-          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [], images: [] };
+          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [], images: [], primaryRowIndex: null, existingComment: '', hasComments: false };
         }
         const cell = data[row.building][row.property_id].months[mk];
         if (isUnknown) cell.unknown = true;
@@ -635,7 +674,11 @@
         if (row.flagged && !isUnknown) cell.flagged = row.flagged;
         if (row.deduction_notes) cell.notes.push('Deductions: ' + row.deduction_notes);
         if (row.notes) cell.notes.push('Notes: ' + row.notes);
-        imgUrls.forEach(u => { if (!cell.images.includes(u)) cell.images.push(u); });
+        imgUrls.forEach(u => {
+          if (!cell.images.includes(u)) cell.images.push(u);
+          if (!cell.primaryRowIndex) { cell.primaryRowIndex = row._rowIndex; cell.existingComment = row.comments || ''; }
+        });
+        if (row.comments) cell.hasComments = true;
       });
     });
     return data;
@@ -663,17 +706,21 @@
           const cell = prop.months[col.key];
           const futureCls = col.isFuture ? ' cell-future' : '';
           const safeB = building.replace(/'/g,"\\'"), safeP = propId.replace(/'/g,"\\'"), safePT = (prop.type||'').replace(/'/g,"\\'");
-          const emptyContent = col.isFuture ? '—' : `<button class="flag-btn" onclick="openUploadModal('${safeB}','${safeP}','${col.key}','${safePT}')">Flag</button>`;
+          const emptyContent = col.isFuture
+            ? `<button class="receipt-btn" onclick="openUploadModal('${safeB}','${safeP}','${col.key}','${safePT}')">Log</button>`
+            : `<button class="flag-btn" onclick="openUploadModal('${safeB}','${safeP}','${col.key}','${safePT}')">Delayed</button>`;
           if (!cell) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           if (cell.unknown) return `<td class="cell-unknown${futureCls}" title="Amount not captured">?</td>`;
           if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           const amt = '₱' + Math.round(cell.amount).toLocaleString();
           const tip = cell.notes.length ? ` title="${cell.notes.filter(Boolean).join(' | ')}"` : '';
+          const escapedComment = (cell.existingComment || '').replace(/'/g,"\\'").replace(/\n/g,' ');
           const receiptBtn = cell.images.length
-            ? `<br><button class="receipt-btn" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}')">Receipt</button>`
+            ? `<br><button class="receipt-btn" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}',${cell.primaryRowIndex},'${escapedComment}')">Receipt</button>`
             : '';
-          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}${receiptBtn}</td>`;
-          return `<td class="cell-paid${futureCls}"${tip}>${amt}${receiptBtn}</td>`;
+          const commentDot = cell.hasComments ? '<span class="cell-has-comments" title="Has comments"></span>' : '';
+          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}${commentDot}${receiptBtn}</td>`;
+          return `<td class="cell-paid${futureCls}"${tip}>${amt}${commentDot}${receiptBtn}</td>`;
         }).join('');
 
         return `<tr>
@@ -768,10 +815,15 @@
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); } });
 
-  async function openImgModal(raw, caption) {
+  async function openImgModal(raw, caption, rowIndex, existingComment) {
+    modalRowIndex = rowIndex || null;
     const modal = document.getElementById('img-modal');
     const img   = document.getElementById('img-modal-img');
     const cap   = document.getElementById('img-modal-caption');
+    document.getElementById('img-modal-comment').value = existingComment || '';
+    document.getElementById('img-modal-save-status').textContent = '';
+    document.getElementById('img-modal-save-btn').disabled = false;
+    document.getElementById('img-modal-save-btn').textContent = 'Save';
     img.src = '';
     cap.textContent = 'Loading…';
     modal.classList.add('open');
@@ -939,6 +991,54 @@
       await fetchSheetData();
     } catch (err) {
       alert('Delete failed: ' + err.message);
+    }
+  }
+
+  function colIndexToLetter(idx) {
+    let letter = ''; idx++;
+    while (idx > 0) {
+      const rem = (idx - 1) % 26;
+      letter = String.fromCharCode(65 + rem) + letter;
+      idx = Math.floor((idx - 1) / 26);
+    }
+    return letter;
+  }
+
+  async function updateRowComment(rowIndex, comment) {
+    const colIdx = sheetHeaders.indexOf('comments');
+    if (colIdx === -1) throw new Error('No "comments" column found in sheet. Please add it as a header.');
+    const col = colIndexToLetter(colIdx);
+    const range = encodeURIComponent(`Helen_Rent_Payments!${col}${rowIndex}`);
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=USER_ENTERED`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [[comment]] })
+    });
+    if (!res.ok) throw new Error(`Failed to save comment: ${res.status}`);
+  }
+
+  async function saveModalComment() {
+    const comment = document.getElementById('img-modal-comment').value.trim();
+    const saveBtn = document.getElementById('img-modal-save-btn');
+    const status  = document.getElementById('img-modal-save-status');
+    if (!modalRowIndex) { status.textContent = 'No row linked.'; return; }
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    status.textContent = '';
+    try {
+      await updateRowComment(modalRowIndex, comment);
+      const row = allRows.find(r => r._rowIndex === modalRowIndex);
+      if (row) row.comments = comment;
+      renderMonthlySummary();
+      saveBtn.textContent = 'Save';
+      saveBtn.disabled = false;
+      status.textContent = 'Saved!';
+      setTimeout(() => { status.textContent = ''; }, 2000);
+    } catch (err) {
+      saveBtn.textContent = 'Save';
+      saveBtn.disabled = false;
+      status.textContent = 'Error: ' + err.message;
     }
   }
 
