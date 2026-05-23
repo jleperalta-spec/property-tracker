@@ -341,6 +341,66 @@
     .delete-btn:hover { background: #fff5f5; }
     .delete-btn:active { box-shadow: none; transform: translateY(2px); }
 
+    /* SMART UPLOAD */
+    #smart-upload-bar {
+      display: flex; align-items: center; gap: 14px;
+      background: white; border-radius: 12px;
+      padding: 14px 20px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    #smart-upload-bar label {
+      font-size: 0.9rem; font-weight: 600; color: #1a1a2e; flex: 1;
+    }
+    #smart-upload-bar p {
+      font-size: 0.78rem; color: #999; margin-top: 2px; font-weight: 400;
+    }
+    #smart-upload-input { display: none; }
+    #smart-upload-btn {
+      padding: 9px 20px; border: none; border-radius: 10px;
+      background: #1a1a2e; color: white; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      box-shadow: 0 3px 0 #0f3460;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    #smart-upload-btn:hover { background: #16213e; }
+    #smart-upload-btn:active { box-shadow: none; transform: translateY(3px); }
+    #smart-upload-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* SMART CONFIRM MODAL */
+    #smart-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #smart-modal.open { display: flex; }
+    #smart-modal-inner {
+      position: relative; background: white; border-radius: 16px;
+      padding: 36px 40px; width: 460px; max-width: 95vw;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
+    }
+    #smart-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 6px; }
+    #smart-modal-subtitle { font-size: 0.82rem; color: #999; margin-bottom: 20px; }
+    #smart-modal-close {
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: #aaa;
+    }
+    #smart-modal-close:hover { color: #333; }
+    #smart-modal-preview {
+      width: 100%; max-height: 160px; object-fit: contain;
+      border-radius: 8px; border: 1px solid #eee; margin-bottom: 18px;
+    }
+    #smart-confirm-btn {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      background: #1a1a2e; color: white; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 3px 0 #0f3460; margin-top: 6px;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    #smart-confirm-btn:hover { background: #16213e; }
+    #smart-confirm-btn:active { box-shadow: none; transform: translateY(3px); }
+    #smart-confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    #smart-modal-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+
     /* LEGEND */
     .legend {
       display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
@@ -382,6 +442,16 @@
   <div id="error-msg"></div>
 
   <div id="main-content" style="display:none">
+
+    <!-- SMART UPLOAD BAR -->
+    <div id="smart-upload-bar">
+      <div>
+        <label>Upload Receipt</label>
+        <p>AI will read the image and extract property, date &amp; amount for you to confirm.</p>
+      </div>
+      <input type="file" id="smart-upload-input" accept="image/*" onchange="handleSmartUpload(event)" />
+      <button id="smart-upload-btn" onclick="document.getElementById('smart-upload-input').click()">Choose Image</button>
+    </div>
 
     <!-- STATS -->
     <div class="stats">
@@ -463,6 +533,26 @@
   </div><!-- /main-content -->
 </div><!-- /app -->
 
+<!-- SMART CONFIRM MODAL -->
+<div id="smart-modal" onclick="closeSmartModal(event)">
+  <div id="smart-modal-inner">
+    <button id="smart-modal-close" onclick="closeSmartModal()">&times;</button>
+    <h2>Confirm Payment Details</h2>
+    <p id="smart-modal-subtitle">AI extracted the following — please review and confirm.</p>
+    <img id="smart-modal-preview" src="" alt="Receipt preview" />
+    <div class="form-row"><label>Building</label><input type="text" id="smart-building" /></div>
+    <div class="form-row"><label>Property</label><input type="text" id="smart-property" /></div>
+    <div class="form-row"><label>Property Type</label><input type="text" id="smart-type" /></div>
+    <div class="form-row"><label>Date Sent</label><input type="date" id="smart-date" /></div>
+    <div class="form-row"><label>Period Start</label><input type="date" id="smart-period-start" /></div>
+    <div class="form-row"><label>Period End</label><input type="date" id="smart-period-end" /></div>
+    <div class="form-row"><label>Months Covered</label><input type="number" id="smart-months" value="1" min="1" /></div>
+    <div class="form-row"><label>Amount (PHP)</label><input type="number" id="smart-amount" step="0.01" min="0" /></div>
+    <div id="smart-modal-error"></div>
+    <button id="smart-confirm-btn" onclick="submitSmartUpload()">Save Payment</button>
+  </div>
+</div>
+
 <!-- UPLOAD MODAL -->
 <div id="upload-modal" onclick="closeUploadModal(event)">
   <div id="upload-modal-inner">
@@ -502,6 +592,7 @@
   const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
   const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
   const DRIVE_FOLDER_ID = '16sSUzdAB2DxafPNsHie20VQqdMhCRFuw';
+  const GEMINI_API_KEY = 'AIzaSyBt51N6T1EulQ7qCnnAW52V0mnPQ79h56o';
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
@@ -994,6 +1085,139 @@
       alert('Delete failed: ' + err.message);
     }
   }
+
+  // ── SMART UPLOAD ─────────────────────────────────────────────────────────────
+
+  let smartUploadFile = null;
+
+  async function handleSmartUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    smartUploadFile = file;
+    const btn = document.getElementById('smart-upload-btn');
+    btn.textContent = 'Reading…';
+    btn.disabled = true;
+
+    try {
+      const base64 = await fileToBase64(file);
+      const extracted = await extractReceiptData(base64, file.type);
+      populateSmartModal(extracted, file);
+      document.getElementById('smart-modal').classList.add('open');
+    } catch (err) {
+      alert('Could not read receipt: ' + err.message);
+    } finally {
+      btn.textContent = 'Choose Image';
+      btn.disabled = false;
+      event.target.value = '';
+    }
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function extractReceiptData(base64, mimeType) {
+    const knownProperties = [...new Set(allRows.map(r => r.property_id).filter(Boolean))].join(', ');
+    const knownBuildings  = [...new Set(allRows.map(r => r.building).filter(Boolean))].join(', ');
+    const prompt = `You are reading a Philippine rental payment receipt image.
+Extract the following fields and return ONLY a valid JSON object with these exact keys:
+- building: the building or location name (known buildings: ${knownBuildings})
+- property_id: the unit or property identifier (known properties: ${knownProperties})
+- property_type: e.g. "Apartment", "Room", "Commercial", etc.
+- date_sent: date the payment was sent, in YYYY-MM-DD format
+- period_start: start of the rental period covered, in YYYY-MM-DD format
+- period_end: end of the rental period covered, in YYYY-MM-DD format
+- months_covered: number of months covered (integer)
+- amount_php: the payment amount in Philippine Peso (number only, no symbols)
+
+If a field cannot be determined, use an empty string. Return only the JSON, no explanation.`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [
+          { text: prompt },
+          { inline_data: { mime_type: mimeType, data: base64 } }
+        ]}]
+      })
+    });
+    if (!res.ok) throw new Error(`Gemini error ${res.status}`);
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const json = text.match(/\{[\s\S]*\}/)?.[0];
+    if (!json) throw new Error('Could not parse AI response.');
+    return JSON.parse(json);
+  }
+
+  function populateSmartModal(data, file) {
+    const preview = document.getElementById('smart-modal-preview');
+    preview.src = URL.createObjectURL(file);
+    document.getElementById('smart-building').value      = data.building      || '';
+    document.getElementById('smart-property').value      = data.property_id   || '';
+    document.getElementById('smart-type').value          = data.property_type || '';
+    document.getElementById('smart-date').value          = data.date_sent     || new Date().toISOString().split('T')[0];
+    document.getElementById('smart-period-start').value  = data.period_start  || '';
+    document.getElementById('smart-period-end').value    = data.period_end    || '';
+    document.getElementById('smart-months').value        = data.months_covered || 1;
+    document.getElementById('smart-amount').value        = data.amount_php    || '';
+    document.getElementById('smart-modal-error').style.display = 'none';
+    document.getElementById('smart-confirm-btn').textContent = 'Save Payment';
+    document.getElementById('smart-confirm-btn').disabled = false;
+  }
+
+  function closeSmartModal(e) {
+    if (e && e.target !== document.getElementById('smart-modal')) return;
+    document.getElementById('smart-modal').classList.remove('open');
+    document.getElementById('smart-modal-preview').src = '';
+    smartUploadFile = null;
+  }
+
+  async function submitSmartUpload() {
+    const building   = document.getElementById('smart-building').value.trim();
+    const property   = document.getElementById('smart-property').value.trim();
+    const type       = document.getElementById('smart-type').value.trim();
+    const date       = document.getElementById('smart-date').value;
+    const pStart     = document.getElementById('smart-period-start').value;
+    const pEnd       = document.getElementById('smart-period-end').value;
+    const months     = document.getElementById('smart-months').value;
+    const amount     = document.getElementById('smart-amount').value.trim();
+    const errEl      = document.getElementById('smart-modal-error');
+    const confirmBtn = document.getElementById('smart-confirm-btn');
+
+    errEl.style.display = 'none';
+    if (!amount)   { errEl.textContent = 'Please enter an amount.';  errEl.style.display = 'block'; return; }
+    if (!property) { errEl.textContent = 'Please enter a property.'; errEl.style.display = 'block'; return; }
+
+    confirmBtn.textContent = 'Saving…';
+    confirmBtn.disabled = true;
+
+    try {
+      const fileId = await uploadToDrive(smartUploadFile);
+      driveFileMap[smartUploadFile.name.toLowerCase()] = fileId;
+      await appendToSheet({
+        building, property_id: property, property_type: type,
+        date_sent: date, period_start: pStart, period_end: pEnd,
+        months_covered: months, amount_php: amount,
+        source_image: smartUploadFile.name
+      });
+      document.getElementById('smart-modal').classList.remove('open');
+      smartUploadFile = null;
+      await fetchSheetData();
+    } catch (err) {
+      errEl.textContent = 'Failed: ' + err.message;
+      errEl.style.display = 'block';
+      confirmBtn.textContent = 'Save Payment';
+      confirmBtn.disabled = false;
+    }
+  }
+
+  // ── HELPERS ──────────────────────────────────────────────────────────────────
 
   function colIndexToLetter(idx) {
     let letter = ''; idx++;
