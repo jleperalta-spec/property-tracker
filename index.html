@@ -134,7 +134,7 @@
     }
     .summary-table-wrapper { overflow-x: auto; }
     .summary-table {
-      width: 100%; min-width: 860px; border-collapse: collapse;
+      width: 100%; min-width: 1100px; border-collapse: collapse;
       font-size: 0.83rem; table-layout: fixed;
     }
     .summary-table thead th {
@@ -749,8 +749,8 @@
           <table class="summary-table">
             <thead>
               <tr>
-                <th style="text-align:left;width:110px">Property</th>
-                <th style="text-align:left;width:80px">Type</th>
+                <th style="text-align:left;width:140px">Property</th>
+                <th style="text-align:left;width:100px">Type</th>
                 ${monthCols.map(c => `<th class="${c.isFuture ? 'cell-future' : ''}">${c.label}</th>`).join('')}
               </tr>
             </thead>
