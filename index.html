@@ -401,6 +401,23 @@
     #smart-confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     #smart-modal-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
 
+    /* GEMINI SUMMARY */
+    #gemini-summary {
+      background: white; border-radius: 12px;
+      padding: 18px 22px; margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+    #gemini-summary-header {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; font-weight: 700; color: #718096;
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+    }
+    #gemini-summary-header span { font-size: 1rem; }
+    #gemini-summary-body {
+      font-size: 0.88rem; color: #2d3748; line-height: 1.7; white-space: pre-wrap;
+    }
+    #gemini-summary-body.loading { color: #aaa; font-style: italic; }
+
     /* LEGEND */
     .legend {
       display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
@@ -451,6 +468,12 @@
       </div>
       <input type="file" id="smart-upload-input" accept="image/*" onchange="handleSmartUpload(event)" />
       <button id="smart-upload-btn" onclick="document.getElementById('smart-upload-input').click()">Choose Image</button>
+    </div>
+
+    <!-- GEMINI SUMMARY -->
+    <div id="gemini-summary">
+      <div id="gemini-summary-header"><span>✦</span> AI Summary</div>
+      <div id="gemini-summary-body" class="loading">Loading summary…</div>
     </div>
 
     <!-- STATS -->
@@ -661,6 +684,7 @@
       renderMonthlySummary();
       populateLogFilters();
       renderLogTable(allRows);
+      generateGeminiSummary();
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error-msg').style.display = 'block';
@@ -1083,6 +1107,75 @@
       await fetchSheetData();
     } catch (err) {
       alert('Delete failed: ' + err.message);
+    }
+  }
+
+  // ── GEMINI SUMMARY ───────────────────────────────────────────────────────────
+
+  async function generateGeminiSummary() {
+    const body = document.getElementById('gemini-summary-body');
+    body.className = 'loading';
+    body.textContent = 'Loading summary…';
+
+    try {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const summaryData = buildSummaryData();
+
+      // Delayed: past months this year with no payment
+      const delayed = [];
+      Object.entries(summaryData).forEach(([building, props]) => {
+        Object.entries(props).forEach(([propId, prop]) => {
+          for (let m = 1; m <= today.getMonth() + 1; m++) {
+            const key = `${currentYear}-${String(m).padStart(2,'0')}`;
+            const cell = prop.months[key];
+            const monthDate = new Date(currentYear, m - 1, 1);
+            if (monthDate <= today && (!cell || (cell.amount === 0 && !cell.flagged && !cell.unknown))) {
+              delayed.push(`${building} — ${propId} (${key})`);
+            }
+          }
+        });
+      });
+
+      // Most recent upload
+      const recent = [...allRows].filter(r => r.date_sent).sort((a, b) => b.date_sent.localeCompare(a.date_sent))[0];
+      const recentText = recent
+        ? `${recent.property_id} (${recent.building}) — ₱${recent.amount_php} on ${recent.date_sent}`
+        : 'None';
+
+      // Notes and comments
+      const notesItems = allRows
+        .filter(r => r.notes || r.deduction_notes || r.comments)
+        .map(r => `${r.property_id} (${r.date_sent}): ${[r.notes, r.deduction_notes, r.comments].filter(Boolean).join(' | ')}`);
+
+      const prompt = `You are a helpful assistant for a Philippine rental property tracker. Based on the data below, write a short, friendly summary in 3 clearly labelled sections. Be concise and practical.
+
+Today: ${today.toISOString().split('T')[0]}
+
+DELAYED PAYMENTS (past months with no recorded payment):
+${delayed.length ? delayed.join('\n') : 'None'}
+
+MOST RECENT UPLOAD:
+${recentText}
+
+NOTES & COMMENTS FROM USER:
+${notesItems.length ? notesItems.join('\n') : 'None'}
+
+Write the summary with these 3 sections: "Delayed Payments", "Recent Upload", "Reminders". Keep it under 120 words total.`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      if (!res.ok) throw new Error(`Gemini error ${res.status}`);
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No summary available.';
+      body.className = '';
+      body.textContent = text;
+    } catch (err) {
+      body.className = '';
+      body.textContent = 'Could not load summary: ' + err.message;
     }
   }
 
