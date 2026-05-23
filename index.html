@@ -472,7 +472,10 @@
 
     <!-- GEMINI SUMMARY -->
     <div id="gemini-summary">
-      <div id="gemini-summary-header"><span>✦</span> AI Summary</div>
+      <div id="gemini-summary-header">
+        <span>✦</span> AI Summary
+        <button onclick="generateGeminiSummary(true)" style="margin-left:auto;background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;font-size:0.75rem;color:#718096;cursor:pointer;">Refresh</button>
+      </div>
       <div id="gemini-summary-body" class="loading">Loading summary…</div>
     </div>
 
@@ -1112,8 +1115,10 @@
 
   // ── GEMINI SUMMARY ───────────────────────────────────────────────────────────
 
-  async function generateGeminiSummary() {
+  async function generateGeminiSummary(force = false) {
     const body = document.getElementById('gemini-summary-body');
+    const cached = sessionStorage.getItem('gemini_summary');
+    if (cached && !force) { body.className = ''; body.textContent = cached; return; }
     body.className = 'loading';
     body.textContent = 'Loading summary…';
 
@@ -1173,6 +1178,7 @@ Write the summary with these 3 sections: "Delayed Payments", "Recent Upload", "R
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No summary available.';
       body.className = '';
       body.textContent = text;
+      sessionStorage.setItem('gemini_summary', text);
     } catch (err) {
       body.className = '';
       body.textContent = 'Could not load summary: ' + err.message;
