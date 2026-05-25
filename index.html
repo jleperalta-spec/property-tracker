@@ -619,6 +619,7 @@
   const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
   const DRIVE_FOLDER_ID = '16sSUzdAB2DxafPNsHie20VQqdMhCRFuw';
   const GEMINI_API_KEY = 'AIzaSyC7LFFqDOTpy3w3ov0uTC9isw-VW3wRA4U';
+  const AI_ENABLED = false;
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let allRows = [];
@@ -682,12 +683,16 @@
       }
       document.getElementById('loading').style.display = 'none';
       document.getElementById('main-content').style.display = 'block';
+      if (!AI_ENABLED) {
+        document.getElementById('gemini-summary').style.display = 'none';
+        document.getElementById('smart-upload-bar').style.display = 'none';
+      }
       buildYearTabs();
       renderStats(allRows.filter(r => r.date_sent?.startsWith(String(selectedYear))));
       renderMonthlySummary();
       populateLogFilters();
       renderLogTable(allRows);
-      generateGeminiSummary();
+      if (AI_ENABLED) generateGeminiSummary();
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error-msg').style.display = 'block';
@@ -1191,7 +1196,7 @@ Write the summary with these 3 sections: "Delayed Payments", "Recent Upload", "R
 
   async function handleSmartUpload(event) {
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file || !AI_ENABLED) return;
     smartUploadFile = file;
     const btn = document.getElementById('smart-upload-btn');
     btn.textContent = 'Reading…';
