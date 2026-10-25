@@ -293,24 +293,25 @@
     .flag-btn:active { box-shadow: none; transform: translateY(2px); }
 
     /* UPLOAD MODAL */
-    #upload-modal {
+    #upload-modal, #edit-modal {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.65); z-index: 1000;
       align-items: center; justify-content: center;
     }
-    #upload-modal.open { display: flex; }
-    #upload-modal-inner {
+    #upload-modal.open, #edit-modal.open { display: flex; }
+    #upload-modal-inner, #edit-modal-inner {
       position: relative; background: white; border-radius: 16px;
       padding: 36px 40px; width: 420px; max-width: 95vw;
+      max-height: 92vh; overflow-y: auto;
       box-shadow: 0 12px 48px rgba(0,0,0,0.3);
     }
-    #upload-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
-    #upload-modal-close {
+    #upload-modal-inner h2, #edit-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
+    #upload-modal-close, #edit-modal-close {
       position: absolute; top: 14px; right: 18px;
       background: none; border: none; font-size: 1.4rem;
       cursor: pointer; color: #aaa; line-height: 1;
     }
-    #upload-modal-close:hover { color: #333; }
+    #upload-modal-close:hover, #edit-modal-close:hover { color: #333; }
     .form-row { margin-bottom: 14px; }
     .form-row label { display: block; font-size: 0.78rem; font-weight: 600; color: #718096; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
     .form-row input {
@@ -320,16 +321,26 @@
     .form-row input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
     .form-row input[readonly] { background: #f7fafc; color: #999; }
     .form-row input[type="file"] { padding: 6px; }
-    #upload-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
-    #upload-submit {
+    #upload-error, #edit-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+    #upload-submit, #edit-submit {
       width: 100%; padding: 12px; border: none; border-radius: 10px;
       background: #1a1a2e; color: white; font-size: 0.95rem; font-weight: 600;
       cursor: pointer; box-shadow: 0 3px 0 #0f3460;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #upload-submit:hover { background: #16213e; }
-    #upload-submit:active { box-shadow: none; transform: translateY(3px); }
-    #upload-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    #upload-submit:hover, #edit-submit:hover { background: #16213e; }
+    #upload-submit:active, #edit-submit:active { box-shadow: none; transform: translateY(3px); }
+    #upload-submit:disabled, #edit-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    .edit-btn {
+      padding: 2px 8px; font-size: 0.75rem; font-weight: 600;
+      background: white; color: #2b6cb0;
+      border: 1px solid #bee3f8; border-radius: 6px;
+      box-shadow: 0 2px 0 #90cdf4;
+      cursor: pointer; user-select: none;
+      transition: box-shadow 0.08s, transform 0.08s;
+    }
+    .edit-btn:hover { background: #ebf8ff; }
+    .edit-btn:active { box-shadow: none; transform: translateY(2px); }
     .delete-btn {
       padding: 2px 8px; font-size: 0.75rem; font-weight: 600;
       background: white; color: #c53030;
@@ -593,6 +604,25 @@
     <div class="form-row"><label>Receipt Image</label><input type="file" id="upload-file" accept="image/*" /></div>
     <div id="upload-error"></div>
     <button id="upload-submit" onclick="submitUpload()">Save Payment</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" onclick="closeEditModal(event)">
+  <div id="edit-modal-inner">
+    <button id="edit-modal-close" onclick="closeEditModal()">&times;</button>
+    <h2>Edit Payment</h2>
+    <div class="form-row"><label>Building</label><input type="text" id="edit-building" /></div>
+    <div class="form-row"><label>Property</label><input type="text" id="edit-property" /></div>
+    <div class="form-row"><label>Property Type</label><input type="text" id="edit-type" /></div>
+    <div class="form-row"><label>Date Sent</label><input type="date" id="edit-date-sent" /></div>
+    <div class="form-row"><label>Period Start</label><input type="date" id="edit-period-start" /></div>
+    <div class="form-row"><label>Period End</label><input type="date" id="edit-period-end" /></div>
+    <div class="form-row"><label>Months Covered</label><input type="number" id="edit-months" min="1" /></div>
+    <div class="form-row"><label>Amount (PHP)</label><input type="number" id="edit-amount" step="0.01" /></div>
+    <div class="form-row"><label>Notes</label><input type="text" id="edit-notes" /></div>
+    <div id="edit-error"></div>
+    <button id="edit-submit" onclick="submitEdit()">Save Changes</button>
   </div>
 </div>
 
@@ -937,7 +967,7 @@
 
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); } });
 
   async function openImgModal(raw, caption, rowIndex, existingComment) {
     modalRowIndex = rowIndex || null;
@@ -1115,6 +1145,86 @@
       await fetchSheetData();
     } catch (err) {
       alert('Delete failed: ' + err.message);
+    }
+  }
+
+  // ── EDIT PAYMENT ─────────────────────────────────────────────────────────────
+
+  const EDIT_FIELDS = {
+    building:       'edit-building',
+    property_id:    'edit-property',
+    property_type:  'edit-type',
+    date_sent:      'edit-date-sent',
+    period_start:   'edit-period-start',
+    period_end:     'edit-period-end',
+    months_covered: 'edit-months',
+    amount_php:     'edit-amount',
+    notes:          'edit-notes',
+  };
+  let editRowIndex = null;
+  let editInitialValues = {};
+
+  function openEditModal(rowIndex) {
+    const row = allRows.find(r => r._rowIndex === rowIndex);
+    if (!row) return;
+    editRowIndex = rowIndex;
+    editInitialValues = {};
+    Object.entries(EDIT_FIELDS).forEach(([field, id]) => {
+      const input = document.getElementById(id);
+      input.value = row[field] || '';
+      // Date/number inputs blank out values they can't parse — remember what was shown
+      editInitialValues[field] = input.value;
+    });
+    document.getElementById('edit-error').style.display = 'none';
+    document.getElementById('edit-submit').textContent = 'Save Changes';
+    document.getElementById('edit-submit').disabled = false;
+    document.getElementById('edit-modal').classList.add('open');
+  }
+
+  function closeEditModal(e) {
+    if (e && e.target !== document.getElementById('edit-modal')) return;
+    document.getElementById('edit-modal').classList.remove('open');
+    editRowIndex = null;
+  }
+
+  async function submitEdit() {
+    const errEl     = document.getElementById('edit-error');
+    const submitBtn = document.getElementById('edit-submit');
+    const row = allRows.find(r => r._rowIndex === editRowIndex);
+    errEl.style.display = 'none';
+    if (!row) { errEl.textContent = 'Payment not found. Please reload.'; errEl.style.display = 'block'; return; }
+    if (!document.getElementById('edit-amount').value.trim()) {
+      errEl.textContent = 'Please enter an amount.'; errEl.style.display = 'block'; return;
+    }
+
+    // Only write cells that actually changed, so untouched columns keep their formatting
+    const data = [];
+    Object.entries(EDIT_FIELDS).forEach(([field, id]) => {
+      const value = document.getElementById(id).value.trim();
+      if (value === editInitialValues[field].trim()) return;
+      const colIdx = sheetHeaders.indexOf(field);
+      if (colIdx === -1) return;
+      data.push({ range: `Helen_Rent_Payments!${colIndexToLetter(colIdx)}${editRowIndex}`, values: [[value]] });
+    });
+    if (!data.length) { closeEditModal(); return; }
+
+    submitBtn.textContent = 'Saving…';
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchUpdate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ valueInputOption: 'USER_ENTERED', data })
+      });
+      if (!res.ok) throw new Error(`Sheets update error ${res.status}`);
+      closeEditModal();
+      await fetchSheetData();
+      applyFilters();
+    } catch (err) {
+      errEl.textContent = 'Failed: ' + err.message;
+      errEl.style.display = 'block';
+      submitBtn.textContent = 'Save Changes';
+      submitBtn.disabled = false;
     }
   }
 
@@ -1393,6 +1503,7 @@ If a field cannot be determined, use an empty string. Return only the JSON, no e
         <td class="notes-cell">${r.notes || r.deduction_notes || '—'}</td>
         <td style="white-space:nowrap">
           ${renderImgBtn(r, `${r.property_id} ${r.date_sent}`)}
+          <button class="edit-btn" onclick="openEditModal(${r._rowIndex})">Edit</button>
           <button class="delete-btn" onclick="deletePayment(${r._rowIndex},'${(r.source_image||'').replace(/'/g,"\\'")}')">Delete</button>
         </td>
       </tr>`;
