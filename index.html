@@ -5,15 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Caalen's Property Payment Tracker</title>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+    /* DESIGN TOKENS */
+    :root {
+      --bg: #eef1f5;
+      --surface: #fcfcfd;
+      --surface-2: #f5f7fa;
+      --border: #e4e8ee;
+      --ink: #1b1f27;
+      --ink-soft: #2a303b;
+      --ink-deep: #0e1117;
+      --on-ink: #f8f9fb;
+      --text: #333a46;
+      --muted: #687080;
+      --subtle: #959caa;
+      --faint: #c3c9d3;
+      --accent: #3b5bdb;
+      --accent-soft: #edf1ff;
+      --accent-line: #b9c6f5;
+      --paid: #0f7a55;
+      --paid-bg: #e2f5ec;
+      --overdue: #c2364b;
+      --overdue-bg: #fdecef;
+      --overdue-line: #f5c2cb;
+      --waiting: #9a5b0c;
+      --waiting-bg: #fdf3dc;
+      --waiting-line: #f1d48f;
+      --credit: #6741d9;
+      --credit-bg: #efeafe;
+      --neutral-bg: #eceff3;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.06);
+      --shadow-lg: 0 18px 48px rgba(16, 24, 40, 0.22);
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #dce8f5;
-      color: #1a1a2e;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg);
+      color: var(--ink);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
+    button, input, select, textarea { font-family: inherit; }
 
     /* LOGIN */
     #login-screen {
@@ -23,10 +61,10 @@
       justify-content: center;
       min-height: 100vh;
       gap: 20px;
-      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 55%, #0f3460 100%);
+      background: linear-gradient(145deg, var(--ink) 0%, var(--ink-soft) 55%, var(--ink-deep) 100%);
     }
     .login-card {
-      background: white;
+      background: var(--surface);
       border-radius: 20px;
       padding: 52px 56px;
       max-width: 460px;
@@ -36,24 +74,24 @@
     }
     .login-icon { font-size: 2.8rem; margin-bottom: 20px; }
     .login-title {
-      font-size: 1.55rem; font-weight: 700; color: #1a1a2e;
+      font-size: 1.55rem; font-weight: 700; color: var(--ink);
       line-height: 1.35; margin-bottom: 14px;
     }
     .login-subtitle {
-      font-size: 1rem; color: #718096;
+      font-size: 1rem; color: var(--muted);
       line-height: 1.6; margin-bottom: 36px;
     }
     #signin-btn {
       display: flex; align-items: center; justify-content: center; gap: 12px;
       width: 100%; padding: 15px 20px;
-      border: 2px solid #e2e8f0; border-radius: 10px;
-      background: white; cursor: pointer;
-      font-size: 1rem; font-weight: 600; color: #2d3748;
+      border: 2px solid var(--border); border-radius: 10px;
+      background: var(--surface); cursor: pointer;
+      font-size: 1rem; font-weight: 600; color: var(--text);
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       transition: all 0.18s;
     }
     #signin-btn:hover {
-      background: #f7fafc; border-color: #cbd5e0;
+      background: var(--surface-2); border-color: var(--faint);
       box-shadow: 0 6px 16px rgba(0,0,0,0.13);
       transform: translateY(-1px);
     }
@@ -69,12 +107,12 @@
       margin-bottom: 24px;
     }
     header h1 { font-size: 1.5rem; }
-    #user-email { font-size: 0.85rem; color: #666; }
+    #user-email { font-size: 0.85rem; color: var(--muted); }
     #sign-out-btn {
-      background: none; border: 1px solid #ccc; border-radius: 6px;
-      padding: 6px 14px; cursor: pointer; font-size: 0.85rem; color: #444;
+      background: none; border: 1px solid var(--faint); border-radius: 6px;
+      padding: 6px 14px; cursor: pointer; font-size: 0.85rem; color: var(--text);
     }
-    #sign-out-btn:hover { background: #eee; }
+    #sign-out-btn:hover { background: var(--border); }
 
     /* STATS */
     .stats {
@@ -84,53 +122,53 @@
       margin-bottom: 24px;
     }
     .stat-card {
-      background: white; border-radius: 12px; padding: 16px 18px;
+      background: var(--surface); border-radius: 12px; padding: 16px 18px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
-    .stat-card .label { font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-card .label { font-size: 0.75rem; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
     .stat-card .value { font-size: 1.3rem; font-weight: 700; }
-    .stat-card.green .value { color: #38a169; }
-    .stat-card.red .value { color: #e53e3e; }
+    .stat-card.green .value { color: var(--paid); }
+    .stat-card.red .value { color: var(--overdue); }
 
     /* VIEW TABS */
     .view-tabs {
       display: flex; gap: 4px; margin-bottom: 20px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid var(--border);
     }
     .view-tab {
       padding: 8px 20px; border: none; background: none;
-      cursor: pointer; font-size: 0.9rem; color: #666;
+      cursor: pointer; font-size: 0.9rem; color: var(--muted);
       border-bottom: 2px solid transparent; margin-bottom: -2px;
     }
-    .view-tab.active { color: #3182ce; border-bottom-color: #3182ce; font-weight: 600; }
-    .view-tab:hover:not(.active) { color: #333; }
+    .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+    .view-tab:hover:not(.active) { color: var(--text); }
 
     /* YEAR TABS */
     .year-tabs {
       display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
     }
     .year-tab {
-      padding: 6px 16px; border-radius: 20px; border: 1px solid #ddd;
-      background: white; cursor: pointer; font-size: 0.85rem; color: #666;
+      padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--surface); cursor: pointer; font-size: 0.85rem; color: var(--muted);
     }
-    .year-tab.active { background: #1a1a2e; color: white; border-color: #1a1a2e; font-weight: 600; }
-    .year-tab.archived { color: #aaa; font-style: italic; }
-    .year-tab.archived.active { background: #718096; border-color: #718096; color: white; font-style: italic; }
+    .year-tab.active { background: var(--ink); color: var(--on-ink); border-color: var(--ink); font-weight: 600; }
+    .year-tab.archived { color: var(--subtle); font-style: italic; }
+    .year-tab.archived.active { background: var(--muted); border-color: var(--muted); color: var(--on-ink); font-style: italic; }
 
     /* BUILDING SUMMARY CARDS */
     .building-summary {
-      background: white; border-radius: 12px;
+      background: var(--surface); border-radius: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
       margin-bottom: 20px; overflow: hidden;
     }
     .building-title {
       padding: 14px 20px;
       font-size: 1rem; font-weight: 700;
-      background: #f7f8fa;
-      border-bottom: 1px solid #eee;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #2d3748;
+      color: var(--text);
     }
     .summary-table-wrapper { overflow-x: auto; }
     .summary-table {
@@ -139,9 +177,9 @@
     }
     .summary-table thead th {
       padding: 8px 12px; text-align: center;
-      font-size: 0.75rem; color: #999;
+      font-size: 0.75rem; color: var(--subtle);
       text-transform: uppercase; letter-spacing: 0.4px;
-      background: #fafafa; border-bottom: 1px solid #eee;
+      background: var(--surface-2); border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
     .summary-table thead th:first-child,
@@ -149,23 +187,23 @@
 
     .summary-table tbody td {
       padding: 9px 12px; text-align: center;
-      border-top: 1px solid #f5f5f5;
+      border-top: 1px solid var(--border);
     }
-    .summary-table tbody td:first-child { text-align: left; font-weight: 600; color: #2d3748; }
-    .summary-table tbody td:nth-child(2) { text-align: left; color: #888; font-size: 0.78rem; }
+    .summary-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+    .summary-table tbody td:nth-child(2) { text-align: left; color: var(--muted); font-size: 0.78rem; }
 
-    .cell-paid { background: #f0fff4; color: #276749; font-weight: 600; }
-    .cell-flagged { background: #fff5f5; color: #c53030; font-weight: 600; cursor: help; }
-    .cell-unknown { background: #fffbeb; color: #b7791f; font-style: italic; }
-    .cell-empty { color: #ccc; }
+    .cell-paid { background: var(--paid-bg); color: var(--paid); font-weight: 600; }
+    .cell-flagged { background: var(--overdue-bg); color: var(--overdue); font-weight: 600; cursor: help; }
+    .cell-unknown { background: var(--waiting-bg); color: var(--waiting); font-style: italic; }
+    .cell-empty { color: var(--faint); }
     .cell-future { opacity: 0.35; }
 
     .totals-row td {
-      font-weight: 700; background: #f7f8fa;
-      border-top: 2px solid #e2e8f0 !important;
+      font-weight: 700; background: var(--surface-2);
+      border-top: 2px solid var(--border) !important;
       font-size: 0.82rem;
     }
-    .totals-row td:first-child { color: #666; text-transform: uppercase; letter-spacing: 0.4px; }
+    .totals-row td:first-child { color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
 
     /* PAYMENT LOG */
     #log-view { display: none; }
@@ -173,39 +211,39 @@
       display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
     }
     .filters select, .filters input {
-      padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px;
-      font-size: 0.88rem; background: white; color: #333;
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.88rem; background: var(--surface); color: var(--text);
     }
     .table-wrapper {
-      background: white; border-radius: 12px;
+      background: var(--surface); border-radius: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow: hidden;
     }
     table.log-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    .log-table thead { background: #f7f8fa; }
+    .log-table thead { background: var(--surface-2); }
     .log-table thead th {
       text-align: left; padding: 11px 14px;
-      font-size: 0.75rem; color: #999;
+      font-size: 0.75rem; color: var(--subtle);
       text-transform: uppercase; letter-spacing: 0.4px;
     }
-    .log-table tbody tr { border-top: 1px solid #f0f0f0; }
-    .log-table tbody tr:hover { background: #fafafa; }
+    .log-table tbody tr { border-top: 1px solid var(--border); }
+    .log-table tbody tr:hover { background: var(--surface-2); }
     .log-table tbody td { padding: 10px 14px; vertical-align: middle; }
-    .log-table tr.flagged { background: #fff9f9; }
-    .log-table tr.flagged:hover { background: #fff5f5; }
+    .log-table tr.flagged { background: var(--overdue-bg); }
+    .log-table tr.flagged:hover { background: var(--overdue-bg); }
 
     .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-    .badge.ok { background: #f0fff4; color: #38a169; }
-    .badge.anomaly { background: #fff5f5; color: #e53e3e; }
+    .badge.ok { background: var(--paid-bg); color: var(--paid); }
+    .badge.anomaly { background: var(--overdue-bg); color: var(--overdue); }
     .building-tag {
       display: inline-block; padding: 2px 8px; border-radius: 6px;
-      font-size: 0.78rem; font-weight: 500; background: #ebf4ff; color: #3182ce;
+      font-size: 0.78rem; font-weight: 500; background: var(--accent-soft); color: var(--accent);
     }
     .amount { font-weight: 600; }
-    .amount.negative { color: #e53e3e; }
-    .notes-cell { color: #888; font-size: 0.8rem; max-width: 200px; }
+    .amount.negative { color: var(--overdue); }
+    .notes-cell { color: var(--muted); font-size: 0.8rem; max-width: 200px; }
 
-    #loading { text-align: center; padding: 40px; color: #888; }
-    #error-msg { text-align: center; padding: 40px; color: #e53e3e; display: none; }
+    #loading { text-align: center; padding: 40px; color: var(--muted); }
+    #error-msg { text-align: center; padding: 40px; color: var(--overdue); display: none; }
 
     /* IMAGE MODAL */
     #img-modal {
@@ -215,7 +253,7 @@
     }
     #img-modal.open { display: flex; }
     #img-modal-inner {
-      position: relative; background: white; border-radius: 12px;
+      position: relative; background: var(--surface); border-radius: 12px;
       padding: 12px; max-width: 90vw; max-height: 90vh;
       display: flex; flex-direction: column; gap: 10px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.4);
@@ -224,55 +262,55 @@
     #img-modal-close {
       position: absolute; top: 8px; right: 10px;
       background: none; border: none; font-size: 1.4rem;
-      cursor: pointer; color: #666; line-height: 1;
+      cursor: pointer; color: var(--muted); line-height: 1;
     }
-    #img-modal-close:hover { color: #333; }
+    #img-modal-close:hover { color: var(--text); }
     #img-modal-img {
       max-width: 80vw; max-height: 55vh;
       object-fit: contain; border-radius: 6px; display: block;
     }
     #img-modal-caption {
-      font-size: 0.8rem; color: #888; text-align: center;
+      font-size: 0.8rem; color: var(--muted); text-align: center;
     }
     #img-modal-comments {
       display: flex; flex-direction: column; gap: 8px;
-      padding-bottom: 12px; border-bottom: 1px solid #eee;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
     }
     #img-modal-comments-label, #img-modal-amount-label {
-      font-size: 0.75rem; font-weight: 600; color: #718096;
+      font-size: 0.75rem; font-weight: 600; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     #img-modal-comment {
-      width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0;
-      border-radius: 8px; font-size: 0.88rem; color: #2d3748;
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.88rem; color: var(--text);
       font-family: inherit; resize: vertical; min-height: 60px;
     }
-    #img-modal-comment:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+    #img-modal-comment:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
     #img-modal-save-btn {
       padding: 4px 14px; font-size: 0.8rem; font-weight: 600;
-      background: white; color: #3182ce;
-      border: 1px solid #90cdf4; border-radius: 5px;
-      box-shadow: 0 2px 0 #63b3ed; cursor: pointer;
+      background: var(--surface); color: var(--accent);
+      border: 1px solid var(--accent-line); border-radius: 5px;
+      box-shadow: 0 2px 0 var(--accent-line); cursor: pointer;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #img-modal-save-btn:hover { background: #ebf8ff; }
+    #img-modal-save-btn:hover { background: var(--accent-soft); }
     #img-modal-save-btn:active { box-shadow: none; transform: translateY(2px); }
     #img-modal-save-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    #img-modal-save-status, #img-modal-amount-status { font-size: 0.78rem; color: #38a169; }
+    #img-modal-save-status, #img-modal-amount-status { font-size: 0.78rem; color: var(--paid); }
     #img-modal-amount-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     #img-modal-amount {
-      width: 140px; padding: 6px 10px; border: 1px solid #e2e8f0;
-      border-radius: 8px; font-size: 0.88rem; color: #2d3748;
+      width: 140px; padding: 6px 10px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.88rem; color: var(--text);
     }
-    #img-modal-amount:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+    #img-modal-amount:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
     #img-modal-amount-btn {
       padding: 4px 14px; font-size: 0.8rem; font-weight: 600;
-      background: white; color: #3182ce;
-      border: 1px solid #90cdf4; border-radius: 5px;
-      box-shadow: 0 2px 0 #63b3ed; cursor: pointer;
+      background: var(--surface); color: var(--accent);
+      border: 1px solid var(--accent-line); border-radius: 5px;
+      box-shadow: 0 2px 0 var(--accent-line); cursor: pointer;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #img-modal-amount-btn:hover { background: #ebf8ff; }
+    #img-modal-amount-btn:hover { background: var(--accent-soft); }
     #img-modal-amount-btn:active { box-shadow: none; transform: translateY(2px); }
     #img-modal-amount-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .cell-has-comments {
@@ -281,25 +319,25 @@
       margin-left: 5px; vertical-align: middle;
     }
     .img-btn {
-      background: none; border: 1px solid #bee3f8; border-radius: 6px;
-      padding: 2px 8px; cursor: pointer; font-size: 0.75rem; color: #3182ce;
+      background: none; border: 1px solid var(--accent-line); border-radius: 6px;
+      padding: 2px 8px; cursor: pointer; font-size: 0.75rem; color: var(--accent);
     }
-    .img-btn:hover { background: #ebf8ff; }
+    .img-btn:hover { background: var(--accent-soft); }
     .receipt-btn {
       display: inline-block; margin-top: 4px;
       padding: 2px 7px; font-size: 0.7rem; font-weight: 600;
-      background: white; color: #3182ce;
-      border: 1px solid #90cdf4; border-radius: 5px;
-      box-shadow: 0 2px 0 #63b3ed;
+      background: var(--surface); color: var(--accent);
+      border: 1px solid var(--accent-line); border-radius: 5px;
+      box-shadow: 0 2px 0 var(--accent-line);
       cursor: pointer; user-select: none;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    .receipt-btn:hover { background: #ebf8ff; }
+    .receipt-btn:hover { background: var(--accent-soft); }
     .receipt-btn:active { box-shadow: none; transform: translateY(2px); }
     .flag-btn {
       display: inline-block; margin-top: 2px;
       padding: 2px 7px; font-size: 0.7rem; font-weight: 600;
-      background: white; color: #c05621;
+      background: var(--surface); color: #c05621;
       border: 1px solid #fbd38d; border-radius: 5px;
       box-shadow: 0 2px 0 #f6ad55;
       cursor: pointer; user-select: none;
@@ -316,80 +354,80 @@
     }
     #upload-modal.open, #edit-modal.open { display: flex; }
     #upload-modal-inner, #edit-modal-inner {
-      position: relative; background: white; border-radius: 16px;
+      position: relative; background: var(--surface); border-radius: 16px;
       padding: 36px 40px; width: 420px; max-width: 95vw;
       max-height: 92vh; overflow-y: auto;
       box-shadow: 0 12px 48px rgba(0,0,0,0.3);
     }
-    #upload-modal-inner h2, #edit-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
+    #upload-modal-inner h2, #edit-modal-inner h2 { font-size: 1.1rem; color: var(--ink); margin-bottom: 20px; }
     #upload-modal-close, #edit-modal-close {
       position: absolute; top: 14px; right: 18px;
       background: none; border: none; font-size: 1.4rem;
-      cursor: pointer; color: #aaa; line-height: 1;
+      cursor: pointer; color: var(--subtle); line-height: 1;
     }
-    #upload-modal-close:hover, #edit-modal-close:hover { color: #333; }
+    #upload-modal-close:hover, #edit-modal-close:hover { color: var(--text); }
     .form-row { margin-bottom: 14px; }
-    .form-row label { display: block; font-size: 0.78rem; font-weight: 600; color: #718096; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .form-row label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
     .form-row input {
-      width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0;
-      border-radius: 8px; font-size: 0.9rem; color: #2d3748;
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; color: var(--text);
     }
-    .form-row input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
-    .form-row input[readonly] { background: #f7fafc; color: #999; }
+    .form-row input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(49,130,206,0.15); }
+    .form-row input[readonly] { background: var(--surface-2); color: var(--subtle); }
     .form-row input[type="file"] { padding: 6px; }
-    #upload-error, #edit-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+    #upload-error, #edit-error { color: var(--overdue); font-size: 0.82rem; margin-bottom: 12px; display: none; }
     #upload-submit, #edit-submit {
       width: 100%; padding: 12px; border: none; border-radius: 10px;
-      background: #1a1a2e; color: white; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; box-shadow: 0 3px 0 #0f3460;
+      background: var(--ink); color: var(--on-ink); font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 3px 0 var(--ink-deep);
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #upload-submit:hover, #edit-submit:hover { background: #16213e; }
+    #upload-submit:hover, #edit-submit:hover { background: var(--ink-soft); }
     #upload-submit:active, #edit-submit:active { box-shadow: none; transform: translateY(3px); }
     #upload-submit:disabled, #edit-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .edit-btn {
       padding: 2px 8px; font-size: 0.75rem; font-weight: 600;
-      background: white; color: #2b6cb0;
-      border: 1px solid #bee3f8; border-radius: 6px;
-      box-shadow: 0 2px 0 #90cdf4;
+      background: var(--surface); color: var(--accent);
+      border: 1px solid var(--accent-line); border-radius: 6px;
+      box-shadow: 0 2px 0 var(--accent-line);
       cursor: pointer; user-select: none;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    .edit-btn:hover { background: #ebf8ff; }
+    .edit-btn:hover { background: var(--accent-soft); }
     .edit-btn:active { box-shadow: none; transform: translateY(2px); }
     .delete-btn {
       padding: 2px 8px; font-size: 0.75rem; font-weight: 600;
-      background: white; color: #c53030;
-      border: 1px solid #fed7d7; border-radius: 6px;
-      box-shadow: 0 2px 0 #fc8181;
+      background: var(--surface); color: var(--overdue);
+      border: 1px solid var(--overdue-line); border-radius: 6px;
+      box-shadow: 0 2px 0 var(--overdue-line);
       cursor: pointer; user-select: none;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    .delete-btn:hover { background: #fff5f5; }
+    .delete-btn:hover { background: var(--overdue-bg); }
     .delete-btn:active { box-shadow: none; transform: translateY(2px); }
 
     /* SMART UPLOAD */
     #smart-upload-bar {
       display: flex; align-items: center; gap: 14px;
-      background: white; border-radius: 12px;
+      background: var(--surface); border-radius: 12px;
       padding: 14px 20px; margin-bottom: 20px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
     #smart-upload-bar label {
-      font-size: 0.9rem; font-weight: 600; color: #1a1a2e; flex: 1;
+      font-size: 0.9rem; font-weight: 600; color: var(--ink); flex: 1;
     }
     #smart-upload-bar p {
-      font-size: 0.78rem; color: #999; margin-top: 2px; font-weight: 400;
+      font-size: 0.78rem; color: var(--subtle); margin-top: 2px; font-weight: 400;
     }
     #smart-upload-input { display: none; }
     #smart-upload-btn {
       padding: 9px 20px; border: none; border-radius: 10px;
-      background: #1a1a2e; color: white; font-size: 0.88rem; font-weight: 600;
+      background: var(--ink); color: var(--on-ink); font-size: 0.88rem; font-weight: 600;
       cursor: pointer; white-space: nowrap;
-      box-shadow: 0 3px 0 #0f3460;
+      box-shadow: 0 3px 0 var(--ink-deep);
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #smart-upload-btn:hover { background: #16213e; }
+    #smart-upload-btn:hover { background: var(--ink-soft); }
     #smart-upload-btn:active { box-shadow: none; transform: translateY(3px); }
     #smart-upload-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
@@ -401,54 +439,54 @@
     }
     #smart-modal.open { display: flex; }
     #smart-modal-inner {
-      position: relative; background: white; border-radius: 16px;
+      position: relative; background: var(--surface); border-radius: 16px;
       padding: 36px 40px; width: 460px; max-width: 95vw;
       box-shadow: 0 12px 48px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
     }
-    #smart-modal-inner h2 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 6px; }
-    #smart-modal-subtitle { font-size: 0.82rem; color: #999; margin-bottom: 20px; }
+    #smart-modal-inner h2 { font-size: 1.1rem; color: var(--ink); margin-bottom: 6px; }
+    #smart-modal-subtitle { font-size: 0.82rem; color: var(--subtle); margin-bottom: 20px; }
     #smart-modal-close {
       position: absolute; top: 14px; right: 18px;
       background: none; border: none; font-size: 1.4rem;
-      cursor: pointer; color: #aaa;
+      cursor: pointer; color: var(--subtle);
     }
-    #smart-modal-close:hover { color: #333; }
+    #smart-modal-close:hover { color: var(--text); }
     #smart-modal-preview {
       width: 100%; max-height: 160px; object-fit: contain;
-      border-radius: 8px; border: 1px solid #eee; margin-bottom: 18px;
+      border-radius: 8px; border: 1px solid var(--border); margin-bottom: 18px;
     }
     #smart-confirm-btn {
       width: 100%; padding: 12px; border: none; border-radius: 10px;
-      background: #1a1a2e; color: white; font-size: 0.95rem; font-weight: 600;
-      cursor: pointer; box-shadow: 0 3px 0 #0f3460; margin-top: 6px;
+      background: var(--ink); color: var(--on-ink); font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; box-shadow: 0 3px 0 var(--ink-deep); margin-top: 6px;
       transition: box-shadow 0.08s, transform 0.08s;
     }
-    #smart-confirm-btn:hover { background: #16213e; }
+    #smart-confirm-btn:hover { background: var(--ink-soft); }
     #smart-confirm-btn:active { box-shadow: none; transform: translateY(3px); }
     #smart-confirm-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    #smart-modal-error { color: #e53e3e; font-size: 0.82rem; margin-bottom: 12px; display: none; }
+    #smart-modal-error { color: var(--overdue); font-size: 0.82rem; margin-bottom: 12px; display: none; }
 
     /* GEMINI SUMMARY */
     #gemini-summary {
-      background: white; border-radius: 12px;
+      background: var(--surface); border-radius: 12px;
       padding: 18px 22px; margin-bottom: 20px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
     }
     #gemini-summary-header {
       display: flex; align-items: center; gap: 8px;
-      font-size: 0.82rem; font-weight: 700; color: #718096;
+      font-size: 0.82rem; font-weight: 700; color: var(--muted);
       text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
     }
     #gemini-summary-header span { font-size: 1rem; }
     #gemini-summary-body {
-      font-size: 0.88rem; color: #2d3748; line-height: 1.7; white-space: pre-wrap;
+      font-size: 0.88rem; color: var(--text); line-height: 1.7; white-space: pre-wrap;
     }
-    #gemini-summary-body.loading { color: #aaa; font-style: italic; }
+    #gemini-summary-body.loading { color: var(--subtle); font-style: italic; }
 
     /* LEGEND */
     .legend {
       display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
-      font-size: 0.8rem; color: #666;
+      font-size: 0.8rem; color: var(--muted);
     }
     .legend-item { display: flex; align-items: center; gap: 6px; }
     .legend-dot {
@@ -458,52 +496,52 @@
     /* CONTRACTS GANTT */
     #contracts-view { display: none; }
     .contracts-empty {
-      background: white; border-radius: 12px; padding: 28px 24px;
+      background: var(--surface); border-radius: 12px; padding: 28px 24px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-      font-size: 0.9rem; color: #4a5568; line-height: 1.7;
+      font-size: 0.9rem; color: var(--text); line-height: 1.7;
     }
-    .contracts-empty code { background: #f7fafc; padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; }
+    .contracts-empty code { background: var(--surface-2); padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; }
     .gantt-scroll {
-      background: white; border-radius: 12px;
+      background: var(--surface); border-radius: 12px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow-x: auto;
     }
     .gantt { min-width: 1100px; }
-    .gantt-row { display: flex; align-items: stretch; border-top: 1px solid #f0f0f0; }
+    .gantt-row { display: flex; align-items: stretch; border-top: 1px solid var(--border); }
     .gantt-label {
       flex: 0 0 190px; padding: 9px 14px;
-      font-size: 0.85rem; font-weight: 600; color: #2d3748;
+      font-size: 0.85rem; font-weight: 600; color: var(--text);
     }
-    .gantt-label small { display: block; font-weight: 400; font-size: 0.74rem; color: #999; }
+    .gantt-label small { display: block; font-weight: 400; font-size: 0.74rem; color: var(--subtle); }
     .gantt-track { flex: 1; position: relative; min-height: 46px; }
     .gantt-rent {
       flex: 0 0 150px; padding: 9px 14px; text-align: right;
-      font-size: 0.85rem; font-weight: 700; color: #276749;
+      font-size: 0.85rem; font-weight: 700; color: var(--paid);
     }
-    .gantt-rent small { display: block; font-weight: 400; font-size: 0.72rem; color: #999; }
-    .gantt-rent.none { color: #c53030; font-weight: 600; font-size: 0.78rem; }
-    .gantt-head { border-top: none; background: #fafafa; border-bottom: 1px solid #eee; }
+    .gantt-rent small { display: block; font-weight: 400; font-size: 0.72rem; color: var(--subtle); }
+    .gantt-rent.none { color: var(--overdue); font-weight: 600; font-size: 0.78rem; }
+    .gantt-head { border-top: none; background: var(--surface-2); border-bottom: 1px solid var(--border); }
     .gantt-head .gantt-label, .gantt-head .gantt-rent {
-      font-size: 0.75rem; color: #999; font-weight: 400;
+      font-size: 0.75rem; color: var(--subtle); font-weight: 400;
       text-transform: uppercase; letter-spacing: 0.4px;
     }
     .gantt-head .gantt-track { min-height: 34px; }
     .gantt-month {
       position: absolute; top: 0; bottom: 0; padding: 10px 0 0 3px;
-      font-size: 0.68rem; color: #999; white-space: nowrap; overflow: hidden;
-      border-left: 1px solid #eee;
+      font-size: 0.68rem; color: var(--subtle); white-space: nowrap; overflow: hidden;
+      border-left: 1px solid var(--border);
     }
-    .gantt-month.year-start { border-left-color: #cbd5e0; color: #4a5568; font-weight: 700; }
-    .gantt-gridline { position: absolute; top: 0; bottom: 0; border-left: 1px solid #f3f3f3; }
-    .gantt-gridline.year-start { border-left-color: #e2e8f0; }
+    .gantt-month.year-start { border-left-color: var(--faint); color: var(--text); font-weight: 700; }
+    .gantt-gridline { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--border); }
+    .gantt-gridline.year-start { border-left-color: var(--border); }
     .gantt-building {
-      padding: 8px 14px; background: #f7f8fa; border-top: 1px solid #eee;
-      font-size: 0.78rem; font-weight: 700; color: #2d3748;
+      padding: 8px 14px; background: var(--surface-2); border-top: 1px solid var(--border);
+      font-size: 0.78rem; font-weight: 700; color: var(--text);
       text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .gantt-today { position: absolute; top: 0; bottom: 0; border-left: 2px solid #e53e3e; z-index: 2; pointer-events: none; }
+    .gantt-today { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--overdue); z-index: 2; pointer-events: none; }
     .gantt-head .gantt-today::after {
       content: 'Today'; position: absolute; top: 1px; left: 3px;
-      font-size: 0.62rem; font-weight: 700; color: #e53e3e;
+      font-size: 0.62rem; font-weight: 700; color: var(--overdue);
     }
     .gantt-bar {
       position: absolute; top: 9px; height: 28px; z-index: 1;
@@ -513,14 +551,208 @@
       transition: filter 0.1s, transform 0.1s;
     }
     .gantt-bar:hover { filter: brightness(0.95); transform: translateY(-1px); }
-    .gantt-bar.active   { background: #c6f6d5; color: #276749; }
-    .gantt-bar.ending   { background: #fefcbf; color: #975a16; box-shadow: inset 0 0 0 1px #f6e05e; }
-    .gantt-bar.expired  { background: #edf2f7; color: #718096; }
-    .gantt-bar.upcoming { background: #bee3f8; color: #2c5282; }
+    .gantt-bar.active   { background: var(--paid-bg); color: var(--paid); }
+    .gantt-bar.ending   { background: var(--waiting-bg); color: var(--waiting); box-shadow: inset 0 0 0 1px var(--waiting-line); }
+    .gantt-bar.expired  { background: var(--neutral-bg); color: var(--muted); }
+    .gantt-bar.upcoming { background: var(--accent-line); color: var(--accent); }
     .gantt-gap {
       position: absolute; top: 9px; height: 28px; border-radius: 6px;
-      background: repeating-linear-gradient(45deg, #fff5f5, #fff5f5 5px, #fed7d7 5px, #fed7d7 10px);
+      background: repeating-linear-gradient(45deg, var(--overdue-bg), var(--overdue-bg) 5px, var(--overdue-line) 5px, var(--overdue-line) 10px);
       cursor: help;
+    }
+
+    /* METRIC STRIP */
+    .metric-strip {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .metric {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; box-shadow: var(--shadow); min-height: 112px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .metric-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .metric-value { font-size: 1.35rem; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+    .metric-value small { font-size: 0.82rem; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .metric-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
+    .metric-sub b { color: var(--text); font-weight: 600; }
+    .metric-bar { height: 6px; border-radius: 99px; background: var(--neutral-bg); overflow: hidden; }
+    .metric-bar span { display: block; height: 100%; background: var(--paid); border-radius: 99px; transition: width 0.4s ease; }
+    .metric.alert .metric-value { color: var(--overdue); }
+    .metric-action {
+      align-self: flex-start; margin-top: auto; padding: 4px 10px; border-radius: 6px;
+      border: 1px solid var(--overdue-line); background: var(--surface); color: var(--overdue);
+      font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    }
+    .metric-action:hover { background: var(--overdue-bg); }
+    .metric-action:disabled { opacity: 0.5; cursor: default; }
+    .skeleton {
+      display: inline-block; height: 1em; width: 60%; border-radius: 6px;
+      background: linear-gradient(90deg, var(--neutral-bg), var(--surface-2), var(--neutral-bg));
+      background-size: 200% 100%; animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* LEDGER */
+    #ledger-view { display: block; }
+    .ledger-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .month-nav { display: flex; align-items: center; gap: 4px; }
+    .month-nav button {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); cursor: pointer; font-size: 1rem; line-height: 1;
+    }
+    .month-nav button:hover { background: var(--surface-2); }
+    .month-nav .today-btn { width: auto; padding: 0 10px; font-size: 0.78rem; font-weight: 600; }
+    #ledger-month-label { min-width: 120px; text-align: center; font-weight: 700; font-size: 0.95rem; }
+    .chip-group { display: flex; gap: 4px; background: var(--neutral-bg); padding: 3px; border-radius: 9px; }
+    .chip {
+      border: none; background: none; padding: 5px 11px; border-radius: 7px;
+      font-size: 0.8rem; font-weight: 500; color: var(--muted); cursor: pointer;
+    }
+    .chip.active { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); font-weight: 600; }
+    .chip .count { color: var(--subtle); margin-left: 3px; font-weight: 500; }
+    #ledger-search {
+      margin-left: auto; padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; background: var(--surface); color: var(--text); min-width: 220px;
+    }
+    #ledger-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .ledger-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: var(--shadow); overflow-x: auto; margin-bottom: 16px;
+    }
+    .ledger-card h3 {
+      padding: 12px 16px; font-size: 0.75rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; gap: 10px;
+    }
+    .ledger-card h3 span { font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--subtle); }
+    table.ledger { width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 900px; }
+    .ledger th {
+      text-align: left; padding: 9px 14px; font-size: 0.7rem; font-weight: 600; color: var(--subtle);
+      text-transform: uppercase; letter-spacing: 0.4px; background: var(--surface-2); white-space: nowrap;
+    }
+    .ledger td { padding: 10px 14px; border-top: 1px solid var(--border); vertical-align: middle; }
+    .ledger td:first-child { min-width: 170px; }
+    .ledger td.nowrap { white-space: nowrap; }
+    .ledger tr:hover td { background: var(--surface-2); }
+    .ledger .num { text-align: right; white-space: nowrap; }
+    .ledger th.num { text-align: right; }
+    .ledger .prop-name { font-weight: 600; color: var(--ink); cursor: pointer; }
+    .ledger .prop-name:hover { color: var(--accent); }
+    .ledger .sub { display: block; font-size: 0.74rem; color: var(--subtle); font-weight: 400; }
+    .ledger .short { color: var(--overdue); }
+    .ledger-empty { padding: 28px 16px; text-align: center; color: var(--muted); font-size: 0.88rem; }
+    .status {
+      display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px;
+      font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+    }
+    .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .status.paid      { background: var(--paid-bg); color: var(--paid); }
+    .status.net       { background: var(--paid-bg); color: var(--paid); }
+    .status.prepaid   { background: var(--credit-bg); color: var(--credit); }
+    .status.awaiting  { background: var(--waiting-bg); color: var(--waiting); }
+    .status.overdue   { background: var(--overdue-bg); color: var(--overdue); }
+    .status.upcoming  { background: var(--neutral-bg); color: var(--muted); }
+    .status.nocontract{ background: var(--neutral-bg); color: var(--muted); }
+    .row-actions { position: relative; text-align: right; white-space: nowrap; }
+    .row-menu-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: 1px solid transparent;
+      background: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; line-height: 1;
+    }
+    .row-menu-btn:hover, .row-menu-btn[aria-expanded="true"] { background: var(--surface); border-color: var(--border); color: var(--ink); }
+    .row-menu {
+      position: absolute; right: 8px; top: 34px; z-index: 20; min-width: 170px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: var(--shadow-lg); padding: 4px; display: none; text-align: left;
+    }
+    .row-menu.open { display: block; }
+    .row-menu button {
+      display: block; width: 100%; text-align: left; padding: 7px 10px; border: none; background: none;
+      border-radius: 6px; font-size: 0.82rem; color: var(--text); cursor: pointer;
+    }
+    .row-menu button:hover { background: var(--surface-2); color: var(--ink); }
+    .row-menu button:disabled { color: var(--faint); cursor: default; background: none; }
+
+    /* PROPERTY DRAWER */
+    #unit-drawer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+    #unit-drawer .drawer-backdrop {
+      position: absolute; inset: 0; background: rgba(14, 17, 23, 0.4);
+      opacity: 0; transition: opacity 0.25s ease;
+    }
+    #unit-drawer .drawer-panel {
+      position: absolute; top: 0; right: 0; bottom: 0; width: 520px; max-width: 100vw;
+      background: var(--surface); box-shadow: var(--shadow-lg); overflow-y: auto;
+      transform: translateX(100%); transition: transform 0.32s cubic-bezier(0.22, 1.2, 0.36, 1);
+      padding: 24px 24px 40px;
+    }
+    #unit-drawer.open { pointer-events: auto; }
+    #unit-drawer.open .drawer-backdrop { opacity: 1; }
+    #unit-drawer.open .drawer-panel { transform: translateX(0); }
+    .drawer-close {
+      position: absolute; top: 16px; right: 18px; background: none; border: none;
+      font-size: 1.4rem; color: var(--subtle); cursor: pointer;
+    }
+    .drawer-close:hover { color: var(--ink); }
+    .drawer-panel h2 { font-size: 1.2rem; color: var(--ink); padding-right: 30px; }
+    .drawer-panel h3 {
+      font-size: 0.72rem; font-weight: 700; color: var(--muted); margin: 22px 0 10px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .drawer-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+    .drawer-kpi { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .drawer-kpi div:first-child { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+    .drawer-kpi div:last-child { font-size: 0.98rem; font-weight: 700; color: var(--ink); margin-top: 3px; }
+    .lease-list { display: flex; flex-direction: column; gap: 6px; }
+    .lease-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer;
+      background: var(--surface); text-align: left; width: 100%; font-size: 0.83rem; color: var(--text);
+    }
+    .lease-item:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+    .lease-item b { color: var(--ink); }
+    .lease-track { position: relative; height: 10px; background: var(--neutral-bg); border-radius: 99px; margin: 4px 0 2px; }
+    .lease-track span { position: absolute; top: 0; bottom: 0; border-radius: 99px; }
+    .lease-track .t-active { background: var(--paid); }
+    .lease-track .t-ending { background: var(--waiting-line); }
+    .lease-track .t-expired { background: var(--faint); }
+    .lease-track .t-upcoming { background: var(--accent-line); }
+    .lease-track .t-today { width: 2px; background: var(--overdue); border-radius: 0; top: -3px; bottom: -3px; }
+    .pay-list { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .pay-list td { padding: 8px 4px; border-top: 1px solid var(--border); vertical-align: top; }
+    .pay-list td.num { text-align: right; white-space: nowrap; font-weight: 600; }
+    .pay-list .note { display: block; color: var(--subtle); font-size: 0.74rem; margin-top: 2px; }
+    .pay-list .rcpt { font-size: 0.72rem; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; }
+
+    /* TOAST */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translate(-50%, 20px);
+      background: var(--ink); color: var(--on-ink); padding: 10px 16px; border-radius: 10px;
+      font-size: 0.85rem; box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s; z-index: 2000;
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    kbd {
+      font-family: inherit; font-size: 0.7rem; padding: 1px 5px; border-radius: 4px;
+      border: 1px solid var(--border); background: var(--surface-2); color: var(--muted);
+    }
+    .form-row select, .form-row textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+      border-radius: 8px; font-size: 0.9rem; color: var(--text); background: var(--surface);
+    }
+    .form-hint { font-size: 0.74rem; color: var(--subtle); margin-top: 4px; }
+
+    @media (max-width: 640px) {
+      #app { padding: 16px; }
+      header h1 { font-size: 1.2rem; }
+      .metric-strip { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .view-tabs { overflow-x: auto; }
+      .view-tab { padding: 8px 12px; white-space: nowrap; }
+      .chip-group { max-width: 100%; overflow-x: auto; }
+      .chip { white-space: nowrap; }
+      .ledger-toolbar > .metric-sub { display: none; }
+      #ledger-search { margin-left: 0; min-width: 0; width: 100%; }
+      .drawer-kpis { grid-template-columns: 1fr 1fr; }
     }
 
     /* CONTRACT MODAL */
@@ -531,49 +763,49 @@
     }
     #contract-modal.open { display: flex; }
     #contract-modal-inner {
-      position: relative; background: white; border-radius: 16px;
+      position: relative; background: var(--surface); border-radius: 16px;
       padding: 30px 34px; width: 640px; max-width: 95vw; max-height: 92vh; overflow-y: auto;
       box-shadow: 0 12px 48px rgba(0,0,0,0.3);
     }
     #contract-modal-close {
       position: absolute; top: 14px; right: 18px;
       background: none; border: none; font-size: 1.4rem;
-      cursor: pointer; color: #aaa; line-height: 1;
+      cursor: pointer; color: var(--subtle); line-height: 1;
     }
-    #contract-modal-close:hover { color: #333; }
-    #contract-modal-inner h2 { font-size: 1.15rem; color: #1a1a2e; }
+    #contract-modal-close:hover { color: var(--text); }
+    #contract-modal-inner h2 { font-size: 1.15rem; color: var(--ink); }
     #contract-modal-inner h3 {
-      font-size: 0.75rem; font-weight: 700; color: #718096; margin: 20px 0 10px;
+      font-size: 0.75rem; font-weight: 700; color: var(--muted); margin: 20px 0 10px;
       text-transform: uppercase; letter-spacing: 0.4px;
     }
-    .contract-sub { font-size: 0.82rem; color: #888; margin: 4px 0 16px; }
+    .contract-sub { font-size: 0.82rem; color: var(--muted); margin: 4px 0 16px; }
     .contract-status { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; margin-left: 6px; }
-    .contract-status.active   { background: #c6f6d5; color: #276749; }
-    .contract-status.ending   { background: #fefcbf; color: #975a16; }
-    .contract-status.expired  { background: #edf2f7; color: #718096; }
-    .contract-status.upcoming { background: #bee3f8; color: #2c5282; }
+    .contract-status.active   { background: var(--paid-bg); color: var(--paid); }
+    .contract-status.ending   { background: var(--waiting-bg); color: var(--waiting); }
+    .contract-status.expired  { background: var(--neutral-bg); color: var(--muted); }
+    .contract-status.upcoming { background: var(--accent-line); color: var(--accent); }
     .contract-facts { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; font-size: 0.88rem; }
-    .contract-facts dt { color: #999; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.3px; padding-top: 2px; }
-    .contract-facts dd { color: #2d3748; }
-    .contract-facts dd small { color: #888; }
-    .evidence { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .contract-facts dt { color: var(--subtle); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.3px; padding-top: 2px; }
+    .contract-facts dd { color: var(--text); }
+    .contract-facts dd small { color: var(--muted); }
+    .evidence { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
     .evidence-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-    .evidence-head span { font-size: 0.78rem; font-weight: 700; color: #4a5568; }
+    .evidence-head span { font-size: 0.78rem; font-weight: 700; color: var(--text); }
     .evidence blockquote {
-      font-family: Georgia, 'Times New Roman', serif; font-size: 0.88rem; color: #2d3748;
-      line-height: 1.55; border-left: 3px solid #90cdf4; padding-left: 10px;
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.88rem; color: var(--text);
+      line-height: 1.55; border-left: 3px solid var(--accent-line); padding-left: 10px;
     }
     .evidence-page-btn {
       padding: 3px 10px; font-size: 0.74rem; font-weight: 600;
-      background: white; color: #3182ce; border: 1px solid #90cdf4; border-radius: 5px;
-      box-shadow: 0 2px 0 #63b3ed; cursor: pointer; white-space: nowrap;
+      background: var(--surface); color: var(--accent); border: 1px solid var(--accent-line); border-radius: 5px;
+      box-shadow: 0 2px 0 var(--accent-line); cursor: pointer; white-space: nowrap;
     }
     .evidence-page-btn:active { box-shadow: none; transform: translateY(2px); }
-    .evidence-canvas { font-size: 0.8rem; color: #888; }
+    .evidence-canvas { font-size: 0.8rem; color: var(--muted); }
     .evidence-canvas:not(:empty) { margin-top: 10px; }
-    .evidence-canvas canvas { width: 100%; height: auto; border: 1px solid #eee; border-radius: 6px; display: block; }
-    .contract-file { font-size: 0.78rem; color: #888; margin-top: 14px; word-break: break-word; }
-    .contract-file a { color: #3182ce; }
+    .evidence-canvas canvas { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 6px; display: block; }
+    .contract-file { font-size: 0.78rem; color: var(--muted); margin-top: 14px; word-break: break-word; }
+    .contract-file a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -621,9 +853,17 @@
     <div id="gemini-summary">
       <div id="gemini-summary-header">
         <span>✦</span> AI Summary
-        <button onclick="generateGeminiSummary(true)" style="margin-left:auto;background:none;border:1px solid #e2e8f0;border-radius:6px;padding:3px 10px;font-size:0.75rem;color:#718096;cursor:pointer;">Refresh</button>
+        <button onclick="generateGeminiSummary(true)" style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-size:0.75rem;color:var(--muted);cursor:pointer;">Refresh</button>
       </div>
       <div id="gemini-summary-body" class="loading">Loading summary…</div>
+    </div>
+
+    <!-- METRIC STRIP -->
+    <div class="metric-strip" id="metric-strip">
+      <div class="metric"><div class="metric-label">This month</div><span class="skeleton"></span><span class="skeleton" style="width:80%"></span></div>
+      <div class="metric"><div class="metric-label">Overdue</div><span class="skeleton"></span></div>
+      <div class="metric"><div class="metric-label">Coming up</div><span class="skeleton"></span></div>
+      <div class="metric"><div class="metric-label">Deductions this year</div><span class="skeleton"></span></div>
     </div>
 
     <!-- STATS -->
@@ -648,19 +888,36 @@
 
     <!-- VIEW TABS -->
     <div class="view-tabs">
-      <button class="view-tab active" data-view="summary" onclick="showView('summary')">Monthly Summary</button>
+      <button class="view-tab active" data-view="ledger" onclick="showView('ledger')">Ledger</button>
+      <button class="view-tab" data-view="summary" onclick="showView('summary')">Monthly Summary</button>
       <button class="view-tab" data-view="log" onclick="showView('log')">Payment Log</button>
       <button class="view-tab" data-view="contracts" onclick="showView('contracts')">Contracts</button>
     </div>
 
+    <!-- LEDGER VIEW -->
+    <div id="ledger-view">
+      <div class="ledger-toolbar">
+        <div class="month-nav">
+          <button onclick="shiftLedgerMonth(-1)" aria-label="Previous month">‹</button>
+          <span id="ledger-month-label"></span>
+          <button onclick="shiftLedgerMonth(1)" aria-label="Next month">›</button>
+          <button class="today-btn" onclick="ledgerThisMonth()">This month</button>
+        </div>
+        <div class="chip-group" id="ledger-filters"></div>
+        <input type="search" id="ledger-search" placeholder="Search property or tenant" oninput="renderLedger()" />
+        <span class="metric-sub"><kbd>/</kbd> search · <kbd>N</kbd> new payment</span>
+      </div>
+      <div id="ledger-content"><div class="ledger-card"><div class="ledger-empty">Loading ledger…</div></div></div>
+    </div>
+
     <!-- MONTHLY SUMMARY VIEW -->
-    <div id="summary-view">
+    <div id="summary-view" style="display:none">
       <div class="year-tabs" id="year-tabs"></div>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#c6f6d5"></div> Paid</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fed7d7"></div> Flagged / Anomaly</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fefcbf"></div> Amount Unknown</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#eee"></div> No payment</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--paid-bg)"></div> Paid</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--overdue-line)"></div> Flagged / Anomaly</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--waiting-bg)"></div> Amount Unknown</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div> No payment</div>
       </div>
       <div id="summary-content"></div>
     </div>
@@ -707,12 +964,12 @@
     <!-- CONTRACTS VIEW -->
     <div id="contracts-view">
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#c6f6d5"></div> Active</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fefcbf"></div> Ending within 60 days</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#bee3f8"></div> Upcoming</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#edf2f7"></div> Expired</div>
-        <div class="legend-item"><div class="legend-dot" style="background:repeating-linear-gradient(45deg,#fff5f5,#fff5f5 3px,#fed7d7 3px,#fed7d7 6px)"></div> No contract</div>
-        <div class="legend-item" style="color:#999">Click a bar to see the contract evidence</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--paid-bg)"></div> Active</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--waiting-bg)"></div> Ending within 60 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent-line)"></div> Upcoming</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--neutral-bg)"></div> Expired</div>
+        <div class="legend-item"><div class="legend-dot" style="background:repeating-linear-gradient(45deg,var(--overdue-bg),var(--overdue-bg) 3px,var(--overdue-line) 3px,var(--overdue-line) 6px)"></div> No contract</div>
+        <div class="legend-item" style="color:var(--subtle)">Click a bar to see the contract evidence</div>
       </div>
       <div id="contracts-content"><div class="contracts-empty">Loading contracts…</div></div>
     </div>
@@ -745,17 +1002,41 @@
   <div id="upload-modal-inner">
     <button id="upload-modal-close" onclick="closeUploadModal()">&times;</button>
     <h2>Log Payment</h2>
-    <div class="form-row"><label>Property</label><input type="text" id="upload-property" readonly /></div>
+    <div class="form-row"><label>Property</label>
+      <input type="text" id="upload-property" readonly />
+      <select id="upload-property-select" style="display:none" onchange="onUploadPropertyChange()"></select>
+      <div class="form-hint" id="upload-expected"></div>
+    </div>
     <div class="form-row"><label>Date Sent</label><input type="date" id="upload-date-sent" /></div>
     <div class="form-row"><label>Period Start</label><input type="date" id="upload-period-start" /></div>
     <div class="form-row"><label>Period End</label><input type="date" id="upload-period-end" /></div>
     <div class="form-row"><label>Months Covered</label><input type="number" id="upload-months" value="1" min="1" /></div>
     <div class="form-row"><label>Amount (PHP)</label><input type="number" id="upload-amount" placeholder="0.00" step="0.01" min="0" /></div>
-    <div class="form-row"><label>Receipt Image</label><input type="file" id="upload-file" accept="image/*" /></div>
+    <div class="form-row"><label>Method</label>
+      <select id="upload-method">
+        <option>NDB Transfer</option>
+        <option>BDO Check</option>
+        <option>GCash</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Notes <span style="text-transform:none;font-weight:400">(optional — e.g. less commission)</span></label><input type="text" id="upload-notes" /></div>
+    <div class="form-row"><label>Receipt Image <span style="text-transform:none;font-weight:400">(optional)</span></label><input type="file" id="upload-file" accept="image/*" /></div>
     <div id="upload-error"></div>
     <button id="upload-submit" onclick="submitUpload()">Save Payment</button>
   </div>
 </div>
+
+<!-- PROPERTY DRAWER -->
+<div id="unit-drawer" aria-hidden="true">
+  <div class="drawer-backdrop" onclick="closeUnitDrawer()"></div>
+  <aside class="drawer-panel" role="dialog" aria-label="Property details">
+    <button class="drawer-close" onclick="closeUnitDrawer()" aria-label="Close">&times;</button>
+    <div id="unit-drawer-body"></div>
+  </aside>
+</div>
+
+<div id="toast" role="status"></div>
 
 <!-- CONTRACT MODAL -->
 <div id="contract-modal" onclick="closeContractModal(event)">
@@ -889,6 +1170,8 @@
       renderMonthlySummary();
       populateLogFilters();
       renderLogTable(allRows);
+      paymentsLoaded = true;
+      renderLedgerAll();
       if (AI_ENABLED) generateGeminiSummary();
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
@@ -910,6 +1193,7 @@
   // ── VIEW TABS ────────────────────────────────────────────────────────────────
 
   function showView(view) {
+    document.getElementById('ledger-view').style.display = view === 'ledger' ? 'block' : 'none';
     document.getElementById('summary-view').style.display = view === 'summary' ? 'block' : 'none';
     document.getElementById('log-view').style.display = view === 'log' ? 'block' : 'none';
     document.getElementById('contracts-view').style.display = view === 'contracts' ? 'block' : 'none';
@@ -1135,7 +1419,7 @@
 
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); closeContractModal(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); closeContractModal(); closeUnitDrawer(); closeRowMenus(); } });
 
   async function openImgModal(raw, caption, rowIndex, existingComment) {
     modalRowIndex = rowIndex || null;
@@ -1201,15 +1485,21 @@
 
   // ── UPLOAD MODAL ─────────────────────────────────────────────────────────────
 
-  function openUploadModal(building, propId, monthKey, propType) {
+  // opts (optional): { amount, periodStart, periodEnd, hint }
+  function openUploadModal(building, propId, monthKey, propType, opts = {}) {
     uploadContext = { building, propId, monthKey, propType };
     document.getElementById('upload-property').value = `${building} — ${propId}`;
+    document.getElementById('upload-property').style.display = '';
+    document.getElementById('upload-property-select').style.display = 'none';
     const [y, m] = monthKey.split('-').map(Number);
     const lastDay = new Date(y, m, 0).getDate();
-    document.getElementById('upload-period-start').value = `${y}-${String(m).padStart(2,'0')}-01`;
-    document.getElementById('upload-period-end').value   = `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+    document.getElementById('upload-period-start').value = opts.periodStart || `${y}-${String(m).padStart(2,'0')}-01`;
+    document.getElementById('upload-period-end').value   = opts.periodEnd || `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
     document.getElementById('upload-months').value = '1';
-    document.getElementById('upload-amount').value = '';
+    document.getElementById('upload-amount').value = opts.amount || '';
+    document.getElementById('upload-expected').textContent = opts.hint || '';
+    document.getElementById('upload-method').value = 'NDB Transfer';
+    document.getElementById('upload-notes').value = '';
     document.getElementById('upload-file').value = '';
     document.getElementById('upload-date-sent').value = new Date().toISOString().split('T')[0];
     document.getElementById('upload-error').style.display = 'none';
@@ -1230,19 +1520,23 @@
     const pStart    = document.getElementById('upload-period-start').value;
     const pEnd      = document.getElementById('upload-period-end').value;
     const months    = document.getElementById('upload-months').value;
+    const method    = document.getElementById('upload-method').value;
+    const notes     = document.getElementById('upload-notes').value.trim();
     const errEl     = document.getElementById('upload-error');
     const submitBtn = document.getElementById('upload-submit');
 
     errEl.style.display = 'none';
+    if (!uploadContext.propId) { errEl.textContent = 'Please choose a property.'; errEl.style.display = 'block'; return; }
     if (!amount) { errEl.textContent = 'Please enter an amount.'; errEl.style.display = 'block'; return; }
-    if (!file)   { errEl.textContent = 'Please select an image.';  errEl.style.display = 'block'; return; }
 
-    submitBtn.textContent = 'Uploading…';
+    submitBtn.textContent = file ? 'Uploading…' : 'Saving…';
     submitBtn.disabled = true;
 
     try {
-      const fileId = await uploadToDrive(file);
-      driveFileMap[file.name.toLowerCase()] = fileId;
+      if (file) {
+        const fileId = await uploadToDrive(file);
+        driveFileMap[file.name.toLowerCase()] = fileId;
+      }
 
       await appendToSheet({
         building:      uploadContext.building,
@@ -1253,7 +1547,9 @@
         period_end:    pEnd,
         months_covered: months,
         amount_php:    amount,
-        source_image:  file.name,
+        payment_method: method,
+        notes:         notes,
+        source_image:  file ? file.name : '',
       });
 
       document.getElementById('upload-modal').classList.remove('open');
@@ -1452,6 +1748,8 @@
           In the sheet, go to <code>File → Import → Upload</code>, choose <code>contracts.csv</code>,
           pick <code>Insert new sheet(s)</code>, then rename the new tab to <code>Contracts</code> and reload this page.
         </div>`;
+        contractsLoaded = true;
+        renderLedgerAll();
         return;
       }
       if (!res.ok) throw new Error(`Failed to fetch contracts: ${res.status}`);
@@ -1470,6 +1768,8 @@
     } catch (err) {
       el.innerHTML = `<div class="contracts-empty">Error loading contracts: ${escHtml(err.message)}</div>`;
     }
+    contractsLoaded = true;
+    renderLedgerAll();
   }
 
   function renderContractsGantt() {
@@ -1669,6 +1969,468 @@
       box.textContent = 'Could not show the page: ' + err.message;
     }
   }
+
+  // ── LEDGER ───────────────────────────────────────────────────────────────────
+
+  // Dennis usually remits a few weeks after rent is due, so a month only counts as
+  // overdue once this many days have passed since the contract due date.
+  const REMIT_GRACE_DAYS = 30;
+  const LEDGER_STATUS = {
+    paid: 'Paid', net: 'Paid net', prepaid: 'Prepaid', awaiting: 'Awaiting remittance',
+    overdue: 'Overdue', upcoming: 'Upcoming', nocontract: 'No contract',
+  };
+  const LEDGER_FILTERS = [
+    { key: 'all',      label: 'All',      test: () => true },
+    { key: 'overdue',  label: 'Not received', test: r => r.status === 'overdue' || r.status === 'awaiting' },
+    { key: 'paid',     label: 'Paid',     test: r => r.status === 'paid' || r.status === 'net' },
+    { key: 'prepaid',  label: 'Prepaid',  test: r => r.status === 'prepaid' },
+    { key: 'upcoming', label: 'Upcoming', test: r => r.status === 'upcoming' },
+  ];
+  let paymentsLoaded = false;
+  let contractsLoaded = false;
+  let portfolio = [];
+  let ledgerCache = [];
+  let ledgerYear = new Date().getFullYear();
+  let ledgerMonth = new Date().getMonth() + 1;
+  let ledgerFilter = 'all';
+
+  function monthKeyOf(y, m) { return `${y}-${String(m).padStart(2, '0')}`; }
+  function monthLabel(y, m) { return `${MONTHS[m - 1]} ${y}`; }
+  function isoDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+  function shortDate(d) { return d ? `${MONTHS[d.getMonth()]} ${d.getDate()}` : '—'; }
+  function digitTokens(s) { return (String(s || '').match(/\d{2,}/g) || []).map(t => String(parseInt(t, 10))); }
+  function isUnattributed(r) { return !r.property_id || /unattributed/i.test(r.property_id); }
+  function rowAmount(r) {
+    const s = String(r.amount_php ?? '').replace(/[^0-9.\-]/g, '');
+    return s === '' ? null : parseFloat(s);
+  }
+
+  // Months a payment covers. Trusts the period dates when they span more months than months_covered says.
+  function ledgerMonths(r) {
+    const base = getPaymentMonths(r);
+    const s = parseContractDate(r.period_start), e = parseContractDate(r.period_end);
+    if (!s || !e) return base;
+    const span = Math.round((e - s) / DAY_MS / 30.44);
+    return span > base.length ? getPaymentMonths({ ...r, months_covered: String(span) }) : base;
+  }
+
+  // Groups contracts and payments into one entry per property. A contract is linked to a payment
+  // property_id by its payment_property_id column, or else by a shared unit/slot number (2610 ↔ T1-2610).
+  function buildPortfolio() {
+    const rows = allRows.filter(r => !isUnattributed(r));
+    rows.forEach(r => { r._months = ledgerMonths(r); r._amount = rowAmount(r); r._sent = parseContractDate(r.date_sent); });
+    const payProps = [];
+    rows.forEach(r => {
+      if (!payProps.some(p => p.id === r.property_id)) payProps.push({ id: r.property_id, building: r.building, type: r.property_type });
+    });
+
+    const units = new Map();
+    contracts.forEach(c => {
+      if (!units.has(c.property)) {
+        units.set(c.property, { key: c.property, name: c.property, building: c.building, type: c.property_type, contracts: [], payIds: new Set() });
+      }
+      const u = units.get(c.property);
+      u.contracts.push(c);
+      const override = (c.payment_property_id || '').toLowerCase();
+      const tokens = digitTokens(c.property);
+      payProps
+        .filter(p => override ? p.id.toLowerCase() === override : digitTokens(p.id).some(t => tokens.includes(t)))
+        .forEach(p => u.payIds.add(p.id));
+    });
+    const mapped = new Set([...units.values()].flatMap(u => [...u.payIds]));
+    payProps.filter(p => !mapped.has(p.id)).forEach(p => {
+      units.set('pay:' + p.id, {
+        key: 'pay:' + p.id, name: `${p.building} ${p.id}`.trim(), building: p.building, type: p.type,
+        contracts: [], payIds: new Set([p.id]), noContract: true,
+      });
+    });
+
+    portfolio = [...units.values()].map(u => {
+      u.contracts.sort((a, b) => a._start - b._start);
+      u.payments = rows.filter(r => u.payIds.has(r.property_id)).sort((a, b) => (a._sent || 0) - (b._sent || 0));
+      u.payTemplate = u.payments[u.payments.length - 1] || null;
+      u.tenant = u.contracts.length ? u.contracts[u.contracts.length - 1].tenant : '';
+      return u;
+    }).sort((a, b) => (!!a.noContract - !!b.noContract) || (a.building || '').localeCompare(b.building || '') || a.name.localeCompare(b.name));
+  }
+
+  // One row per property for a calendar month: expected (contract rent) vs received (payments covering it)
+  function ledgerRows(y, m) {
+    const mk = monthKeyOf(y, m);
+    const monthStart = new Date(y, m - 1, 1), monthEnd = new Date(y, m, 0);
+    const today = todayDate();
+    const out = [];
+    portfolio.forEach(u => {
+      const contract = [...u.contracts].reverse().find(c => c._start <= monthEnd && c._end >= monthStart) || null;
+      const pays = u.payments.filter(r => r._months.includes(mk));
+      if (!contract && !pays.length) return;
+
+      let received = 0, unknown = false;
+      pays.forEach(r => { if (r._amount === null) unknown = true; else received += r._amount / r._months.length; });
+      const expected = contract ? contract._rent : null;
+      const due = contract ? new Date(y, m - 1, Math.min(contract._start.getDate(), monthEnd.getDate())) : null;
+
+      let status;
+      if (!contract) status = 'nocontract';
+      else if (pays.length) {
+        const prepaid = pays.some(r => r._months.length >= 3 && r._sent && r._sent < monthStart);
+        status = prepaid ? 'prepaid' : (unknown || received >= expected - 1) ? 'paid' : 'net';
+      } else if (today < due) status = 'upcoming';
+      else status = (today - due) / DAY_MS > REMIT_GRACE_DAYS ? 'overdue' : 'awaiting';
+
+      const last = pays[pays.length - 1];
+      out.push({
+        unit: u, contract, y, m, mk, due, expected, pays, status, unknown,
+        received: Math.round(received),
+        short: expected && pays.length && !unknown ? Math.max(0, Math.round(expected - received)) : 0,
+        dateReceived: last ? last._sent : null,
+        method: [...new Set(pays.map(r => r.payment_method).filter(Boolean))].join(', '),
+      });
+    });
+    return out;
+  }
+
+  function recentOverdue() {
+    const t = todayDate();
+    const out = [];
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(t.getFullYear(), t.getMonth() - i, 1);
+      out.push(...ledgerRows(d.getFullYear(), d.getMonth() + 1).filter(r => r.status === 'overdue'));
+    }
+    return out;
+  }
+
+  function deductionsThisYear() {
+    const t = todayDate();
+    let total = 0;
+    for (let m = 1; m <= t.getMonth() + 1; m++) {
+      ledgerRows(t.getFullYear(), m).forEach(r => { if (r.status !== 'nocontract') total += r.short; });
+    }
+    return total;
+  }
+
+  function renderLedgerAll() {
+    if (!paymentsLoaded || !contractsLoaded) return;
+    buildPortfolio();
+    renderMetricStrip();
+    renderLedger();
+  }
+
+  function renderMetricStrip() {
+    const rows = ledgerRows(ledgerYear, ledgerMonth);
+    const leased = rows.filter(r => r.contract);
+    const expected = leased.reduce((s, r) => s + r.expected, 0);
+    const received = leased.reduce((s, r) => s + r.received, 0);
+    const pct = expected ? Math.min(100, Math.round(received / expected * 100)) : 0;
+    const extra = rows.filter(r => !r.contract);
+    const extraAmt = extra.reduce((s, r) => s + r.received, 0);
+
+    const overdue = recentOverdue();
+    const overdueAmt = overdue.reduce((s, r) => s + r.expected, 0);
+
+    const today = todayDate();
+    const renewals = portfolio
+      .map(u => u.contracts[u.contracts.length - 1])
+      .filter(c => c && c._end >= today && (c._end - today) / DAY_MS <= 60)
+      .sort((a, b) => a._end - b._end);
+    const nextDue = ledgerRows(today.getFullYear(), today.getMonth() + 1)
+      .filter(r => r.status === 'upcoming').sort((a, b) => a.due - b.due)[0];
+    const ytd = deductionsThisYear();
+
+    document.getElementById('metric-strip').innerHTML = `
+      <div class="metric">
+        <div class="metric-label">Collected · ${monthLabel(ledgerYear, ledgerMonth)}</div>
+        <div class="metric-value">${fmtPeso(received)} <small>of ${fmtPeso(expected)} · ${pct}%</small></div>
+        <div class="metric-bar"><span style="width:${pct}%"></span></div>
+        <div class="metric-sub">${extra.length ? `+ ${fmtPeso(extraAmt)} from ${extra.length} ${extra.length === 1 ? 'property' : 'properties'} without a contract` : 'Expected = contract rent of every lease active this month'}</div>
+      </div>
+      <div class="metric ${overdue.length ? 'alert' : ''}">
+        <div class="metric-label">Overdue · last 12 months</div>
+        <div class="metric-value">${overdue.length ? fmtPeso(overdueAmt) : 'None'} ${overdue.length ? `<small>${overdue.length} ${overdue.length === 1 ? 'month' : 'months'}</small>` : ''}</div>
+        <div class="metric-sub">${overdue.length
+          ? overdue.slice(0, 2).map(r => `<b>${escHtml(r.unit.name)}</b> ${MONTHS[r.m - 1]}`).join(' · ') + (overdue.length > 2 ? ` · +${overdue.length - 2} more` : '')
+          : `Nothing more than ${REMIT_GRACE_DAYS} days past due`}</div>
+        <button class="metric-action" onclick="copyFollowUp()" ${overdue.length ? '' : 'disabled'}>Copy follow-up for Dennis</button>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Coming up</div>
+        <div class="metric-value">${renewals.length} <small>${renewals.length === 1 ? 'lease ends' : 'leases end'} within 60 days</small></div>
+        <div class="metric-sub">${renewals.slice(0, 3).map(c => `<b>${escHtml(c.property)}</b> ${shortDate(c._end)}`).join(' · ') || 'No renewals due soon'}</div>
+        <div class="metric-sub">${nextDue ? `Next due: <b>${escHtml(nextDue.unit.name)}</b> ${shortDate(nextDue.due)} · ${fmtPeso(nextDue.expected)}` : ''}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Deductions · ${today.getFullYear()}</div>
+        <div class="metric-value">${fmtPeso(ytd)}</div>
+        <div class="metric-sub">Contract rent minus what Helen received: Dennis's 12% fee, notary and other expenses.</div>
+      </div>`;
+  }
+
+  function renderLedger() {
+    if (!paymentsLoaded || !contractsLoaded) return;
+    document.getElementById('ledger-month-label').textContent = monthLabel(ledgerYear, ledgerMonth);
+    const q = document.getElementById('ledger-search').value.trim().toLowerCase();
+    const matches = r => !q || [r.unit.name, r.unit.building, r.contract?.tenant, r.unit.tenant, ...r.unit.payIds]
+      .join(' ').toLowerCase().includes(q);
+    const rows = ledgerRows(ledgerYear, ledgerMonth).filter(matches);
+
+    document.getElementById('ledger-filters').innerHTML = LEDGER_FILTERS.map(f =>
+      `<button class="chip ${f.key === ledgerFilter ? 'active' : ''}" onclick="setLedgerFilter('${f.key}')">${f.label}<span class="count">${rows.filter(f.test).length}</span></button>`
+    ).join('');
+
+    const test = LEDGER_FILTERS.find(f => f.key === ledgerFilter).test;
+    ledgerCache = rows.filter(test);
+    const leased = ledgerCache.filter(r => r.contract);
+    const other = ledgerCache.filter(r => !r.contract);
+    const mk = monthKeyOf(ledgerYear, ledgerMonth);
+    const unmatched = ledgerFilter === 'all' && !q ? allRows.filter(r => isUnattributed(r) && (r.date_sent || '').startsWith(mk)) : [];
+
+    const head = `<tr><th>Property</th><th>Tenant</th><th class="num">Contract rent</th><th>Due</th><th>Received on</th>
+      <th class="num">Amount received</th><th>Method</th><th>Status</th><th></th></tr>`;
+    const rowHtml = r => {
+      const i = ledgerCache.indexOf(r);
+      const pi = portfolio.indexOf(r.unit);
+      const amount = r.pays.length
+        ? (r.unknown ? 'Amount unknown' : fmtPeso(r.received)) +
+          (r.short ? `<span class="sub short">−${fmtPeso(r.short)} deducted</span>` : '') +
+          (r.pays.some(p => p._months.length > 1) ? `<span class="sub">share of ${fmtPeso(r.pays.reduce((s, p) => s + (p._amount || 0), 0))} payment</span>` : '')
+        : '—';
+      return `<tr>
+        <td><span class="prop-name" onclick="openUnitDrawer(${pi})">${escHtml(r.unit.name)}</span>
+          <span class="sub">${escHtml([r.unit.building, r.unit.type].filter(Boolean).join(' · '))}</span></td>
+        <td>${escHtml(r.contract?.tenant || '') || '<span class="sub">—</span>'}</td>
+        <td class="num">${r.expected ? fmtPeso(r.expected) : '—'}</td>
+        <td class="nowrap">${shortDate(r.due)}</td>
+        <td class="nowrap">${shortDate(r.dateReceived)}</td>
+        <td class="num">${amount}</td>
+        <td>${escHtml(r.method) || '—'}</td>
+        <td><span class="status ${r.status}">${LEDGER_STATUS[r.status]}</span></td>
+        <td class="row-actions">
+          <button class="row-menu-btn" aria-expanded="false" aria-label="Actions" onclick="toggleRowMenu(event, ${i})">⋯</button>
+          <div class="row-menu" id="row-menu-${i}">
+            <button onclick="logLedgerPayment(${i})">Log payment</button>
+            <button onclick="closeRowMenus(); openContractModal(${r.contract ? r.contract._i : -1})" ${r.contract ? '' : 'disabled'}>View contract</button>
+            <button onclick="closeRowMenus(); openUnitDrawer(${pi})">Open property</button>
+          </div>
+        </td>
+      </tr>`;
+    };
+
+    const empty = msg => `<div class="ledger-empty">${msg}</div>`;
+    let html = `<div class="ledger-card"><h3>Leased properties<span>${monthLabel(ledgerYear, ledgerMonth)} · due dates from each contract</span></h3>
+      ${leased.length ? `<table class="ledger"><thead>${head}</thead><tbody>${leased.map(rowHtml).join('')}</tbody></table>`
+        : empty(q || ledgerFilter !== 'all' ? 'Nothing matches this filter.' : 'No active leases this month.')}</div>`;
+    if (other.length) {
+      html += `<div class="ledger-card"><h3>Payments without a contract on file<span>Add the contract to the Contracts tab to track what's expected</span></h3>
+        <table class="ledger"><thead>${head}</thead><tbody>${other.map(rowHtml).join('')}</tbody></table></div>`;
+    }
+    if (unmatched.length) {
+      html += `<div class="ledger-card"><h3>Unmatched payments<span>No property on the record. Edit them in the Payment Log</span></h3>
+        <table class="ledger"><thead><tr><th>Sent</th><th class="num">Amount</th><th>Method</th><th>Flag</th><th>Notes</th></tr></thead><tbody>
+        ${unmatched.map(r => `<tr><td>${escHtml(r.date_sent)}</td><td class="num">${rowAmount(r) === null ? '—' : fmtPeso(rowAmount(r))}</td>
+          <td>${escHtml(r.payment_method) || '—'}</td><td>${r.flagged ? `<span class="status overdue">${escHtml(r.flagged)}</span>` : ''}</td>
+          <td class="sub">${escHtml(r.notes)}</td></tr>`).join('')}
+        </tbody></table></div>`;
+    }
+    document.getElementById('ledger-content').innerHTML = html;
+  }
+
+  function setLedgerFilter(key) { ledgerFilter = key; renderLedger(); }
+
+  function shiftLedgerMonth(delta) {
+    const d = new Date(ledgerYear, ledgerMonth - 1 + delta, 1);
+    ledgerYear = d.getFullYear();
+    ledgerMonth = d.getMonth() + 1;
+    renderMetricStrip();
+    renderLedger();
+  }
+
+  function ledgerThisMonth() {
+    const t = new Date();
+    ledgerYear = t.getFullYear();
+    ledgerMonth = t.getMonth() + 1;
+    renderMetricStrip();
+    renderLedger();
+  }
+
+  function toggleRowMenu(e, i) {
+    e.stopPropagation();
+    const menu = document.getElementById(`row-menu-${i}`);
+    const wasOpen = menu.classList.contains('open');
+    closeRowMenus();
+    if (!wasOpen) { menu.classList.add('open'); e.currentTarget.setAttribute('aria-expanded', 'true'); }
+  }
+
+  function closeRowMenus() {
+    document.querySelectorAll('.row-menu.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.row-menu-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+  document.addEventListener('click', e => { if (!e.target.closest('.row-actions')) closeRowMenus(); });
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove('show'), 2600);
+  }
+
+  async function copyFollowUp() {
+    const items = recentOverdue();
+    if (!items.length) return;
+    const lines = items.map(r => `- ${r.unit.name} (${monthLabel(r.y, r.m)}): ${fmtPeso(r.expected)}`);
+    const msg = `Hi Dennis, pa-follow up naman ng rent for these, wala pa kasi sa records ko:\n${lines.join('\n')}\n\nKung na-remit na, pa-send na lang ng receipt. Thanks!`;
+    try {
+      await navigator.clipboard.writeText(msg);
+      toast('Follow-up copied. Paste it in Viber.');
+    } catch {
+      window.prompt('Copy this message:', msg);
+    }
+  }
+
+  // Values for the Log Payment form, taken from the property's last payment record and its contract
+  function paymentPrefill(u, y, m) {
+    const t = u.payTemplate;
+    const contract = [...u.contracts].reverse().find(c => c._start <= new Date(y, m, 0) && c._end >= new Date(y, m - 1, 1));
+    const out = {
+      building: t?.building || u.building || '',
+      propId: t?.property_id || contract?.payment_property_id || u.name,
+      type: t?.property_type || (/parking/i.test(u.type || '') ? 'Slot' : 'Unit'),
+      mk: monthKeyOf(y, m),
+      opts: {},
+    };
+    if (contract) {
+      const day = contract._start.getDate();
+      const start = new Date(y, m - 1, Math.min(day, new Date(y, m, 0).getDate()));
+      const end = new Date(new Date(y, m, Math.min(day, new Date(y, m + 1, 0).getDate())).getTime() - DAY_MS);
+      out.opts = {
+        amount: contract._rent,
+        periodStart: isoDate(start),
+        periodEnd: isoDate(end),
+        hint: `Contract rent ${fmtPeso(contract._rent)}/mo. Enter what Helen actually received; deductions are tracked automatically.`,
+      };
+    }
+    return out;
+  }
+
+  function logLedgerPayment(i) {
+    closeRowMenus();
+    const r = ledgerCache[i];
+    if (!r) return;
+    const p = paymentPrefill(r.unit, r.y, r.m);
+    openUploadModal(p.building, p.propId, p.mk, p.type, p.opts);
+  }
+
+  function openNewPayment() {
+    if (!paymentsLoaded || !contractsLoaded) return;
+    const t = todayDate();
+    openUploadModal('', '', monthKeyOf(t.getFullYear(), t.getMonth() + 1), '');
+    uploadContext = { building: '', propId: '', monthKey: monthKeyOf(t.getFullYear(), t.getMonth() + 1), propType: '' };
+    const sel = document.getElementById('upload-property-select');
+    sel.innerHTML = '<option value="">Choose a property…</option>' +
+      portfolio.map((u, i) => `<option value="${i}">${escHtml(u.name)}</option>`).join('');
+    document.getElementById('upload-property').style.display = 'none';
+    sel.style.display = '';
+    sel.focus();
+  }
+
+  function onUploadPropertyChange() {
+    const u = portfolio[parseInt(document.getElementById('upload-property-select').value)];
+    if (!u) { uploadContext.propId = ''; return; }
+    const t = todayDate();
+    const p = paymentPrefill(u, t.getFullYear(), t.getMonth() + 1);
+    uploadContext = { building: p.building, propId: p.propId, monthKey: p.mk, propType: p.type };
+    if (p.opts.amount) document.getElementById('upload-amount').value = p.opts.amount;
+    if (p.opts.periodStart) document.getElementById('upload-period-start').value = p.opts.periodStart;
+    if (p.opts.periodEnd) document.getElementById('upload-period-end').value = p.opts.periodEnd;
+    document.getElementById('upload-expected').textContent = p.opts.hint || 'No contract on file for this property.';
+  }
+
+  // ── PROPERTY DRAWER ──────────────────────────────────────────────────────────
+
+  function openUnitDrawer(pi) {
+    const u = portfolio[pi];
+    if (!u) return;
+    const today = todayDate();
+    const current = [...u.contracts].reverse().find(c => c._start <= today && c._end >= today);
+    const latest = u.contracts[u.contracts.length - 1];
+    const totalReceived = u.payments.reduce((s, r) => s + (r._amount || 0), 0);
+    const lastPay = u.payments[u.payments.length - 1];
+
+    let timeline = '';
+    if (u.contracts.length) {
+      const from = u.contracts[0]._start;
+      const to = new Date(Math.max(latest._end, today));
+      const pct = d => (d - from) / (to - from) * 100;
+      timeline = `<div class="lease-track">
+        ${u.contracts.map(c => `<span class="t-${contractStatus(c, today)}" style="left:${pct(c._start)}%;width:${Math.max(1, pct(c._end) - pct(c._start))}%"></span>`).join('')}
+        <span class="t-today" style="left:${pct(today)}%"></span>
+      </div>
+      <div class="metric-sub" style="display:flex;justify-content:space-between"><span>${shortDate(from)} ${from.getFullYear()}</span><span>${shortDate(to)} ${to.getFullYear()}</span></div>`;
+    }
+
+    const leases = [...u.contracts].reverse().map(c => {
+      const st = contractStatus(c, today);
+      return `<button class="lease-item" onclick="openContractModal(${c._i})">
+        <span><b>${fmtDate(c._start)} → ${fmtDate(c._end)}</b><br><span class="sub">${escHtml(c.tenant || '')}</span></span>
+        <span style="text-align:right">${fmtPeso(c._rent)}/mo<br><span class="contract-status ${st}" style="margin:0">${STATUS_LABELS[st]}</span></span>
+      </button>`;
+    }).join('');
+
+    const pays = [...u.payments].reverse().map(r => {
+      const img = (r.source_image || '').split(/[,/]/).map(s => s.trim()).filter(s => /\.(jpe?g|png|gif|webp|heic)$/i.test(s))[0];
+      const note = [r.deduction_notes, r.notes, r.comments].filter(Boolean).join(' · ');
+      const caption = `${r.property_id} ${r.date_sent}`.replace(/'/g, "\\'");
+      return `<tr>
+        <td>${escHtml(r.date_sent)}<span class="note">${escHtml(r.period_start)}${r.period_end ? ' → ' + escHtml(r.period_end) : ''}</span></td>
+        <td>${note ? `<span class="note" style="margin:0">${escHtml(note)}</span>` : ''}
+          ${img ? `<button class="rcpt" onclick="openImgModal('${img.replace(/'/g, "\\'")}', '${caption}', ${r._rowIndex}, '${(r.comments || '').replace(/'/g, "\\'").replace(/\n/g, ' ')}')">View receipt</button>` : ''}</td>
+        <td class="num">${r._amount === null ? '—' : fmtPeso(r._amount)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('unit-drawer-body').innerHTML = `
+      <h2>${escHtml(u.name)}</h2>
+      <div class="contract-sub">${escHtml([u.building, u.type, ...u.payIds].filter(Boolean).join(' · '))}</div>
+      <div class="drawer-kpis">
+        <div class="drawer-kpi"><div>Current rent</div><div>${current ? fmtPeso(current._rent) : '—'}</div></div>
+        <div class="drawer-kpi"><div>Lease ends</div><div>${current ? shortDate(current._end) + ' ' + current._end.getFullYear() : (u.noContract ? 'No contract' : 'Expired')}</div></div>
+        <div class="drawer-kpi"><div>Deposit held</div><div style="font-size:0.85rem">${escHtml((current || latest)?.deposit || '—')}</div></div>
+      </div>
+      ${current?.tenant ? `<h3>Tenant</h3><div class="metric-sub"><b>${escHtml(current.tenant)}</b>${current.rent_note ? ' · ' + escHtml(current.rent_note) : ''}</div>` : ''}
+      <h3>Leases</h3>
+      ${u.contracts.length ? timeline + `<div class="lease-list" style="margin-top:10px">${leases}</div>` : '<div class="metric-sub">No contract on file. Add one to the Contracts tab to track expected rent.</div>'}
+      <h3>Payments · ${fmtPeso(totalReceived)} received${lastPay ? `, last on ${escHtml(lastPay.date_sent)}` : ''}</h3>
+      ${u.payments.length ? `<table class="pay-list"><tbody>${pays}</tbody></table>` : '<div class="metric-sub">No payments logged yet.</div>'}`;
+    const drawer = document.getElementById('unit-drawer');
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeUnitDrawer() {
+    const drawer = document.getElementById('unit-drawer');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  // ── KEYBOARD SHORTCUTS ───────────────────────────────────────────────────────
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (['input', 'textarea', 'select'].includes(tag) || e.target.isContentEditable) return;
+    if (document.getElementById('app').style.display !== 'block') return;
+    if (document.querySelector('#upload-modal.open, #edit-modal.open, #img-modal.open, #contract-modal.open, #smart-modal.open')) return;
+    if (e.key === '/') {
+      e.preventDefault();
+      closeUnitDrawer();
+      showView('ledger');
+      document.getElementById('ledger-search').focus();
+    } else if (e.key === 'n' || e.key === 'N') {
+      e.preventDefault();
+      closeUnitDrawer();
+      openNewPayment();
+    }
+  });
 
   // ── GEMINI SUMMARY ───────────────────────────────────────────────────────────
 
@@ -1916,6 +2678,7 @@ If a field cannot be determined, use an empty string. Return only the JSON, no e
       await updateRowCell(modalRowIndex, 'amount_php', amount);
       const row = allRows.find(r => r._rowIndex === modalRowIndex);
       if (row) row.amount_php = amount;
+      renderLedgerAll();
       renderStats(allRows.filter(r => r.date_sent?.startsWith(String(selectedYear))));
       renderMonthlySummary();
       applyFilters();
