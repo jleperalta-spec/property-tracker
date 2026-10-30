@@ -454,6 +454,126 @@
     .legend-dot {
       width: 12px; height: 12px; border-radius: 3px;
     }
+
+    /* CONTRACTS GANTT */
+    #contracts-view { display: none; }
+    .contracts-empty {
+      background: white; border-radius: 12px; padding: 28px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+      font-size: 0.9rem; color: #4a5568; line-height: 1.7;
+    }
+    .contracts-empty code { background: #f7fafc; padding: 1px 6px; border-radius: 4px; font-size: 0.82rem; }
+    .gantt-scroll {
+      background: white; border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07); overflow-x: auto;
+    }
+    .gantt { min-width: 1100px; }
+    .gantt-row { display: flex; align-items: stretch; border-top: 1px solid #f0f0f0; }
+    .gantt-label {
+      flex: 0 0 190px; padding: 9px 14px;
+      font-size: 0.85rem; font-weight: 600; color: #2d3748;
+    }
+    .gantt-label small { display: block; font-weight: 400; font-size: 0.74rem; color: #999; }
+    .gantt-track { flex: 1; position: relative; min-height: 46px; }
+    .gantt-rent {
+      flex: 0 0 150px; padding: 9px 14px; text-align: right;
+      font-size: 0.85rem; font-weight: 700; color: #276749;
+    }
+    .gantt-rent small { display: block; font-weight: 400; font-size: 0.72rem; color: #999; }
+    .gantt-rent.none { color: #c53030; font-weight: 600; font-size: 0.78rem; }
+    .gantt-head { border-top: none; background: #fafafa; border-bottom: 1px solid #eee; }
+    .gantt-head .gantt-label, .gantt-head .gantt-rent {
+      font-size: 0.75rem; color: #999; font-weight: 400;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .gantt-head .gantt-track { min-height: 34px; }
+    .gantt-month {
+      position: absolute; top: 0; bottom: 0; padding: 10px 0 0 3px;
+      font-size: 0.68rem; color: #999; white-space: nowrap; overflow: hidden;
+      border-left: 1px solid #eee;
+    }
+    .gantt-month.year-start { border-left-color: #cbd5e0; color: #4a5568; font-weight: 700; }
+    .gantt-gridline { position: absolute; top: 0; bottom: 0; border-left: 1px solid #f3f3f3; }
+    .gantt-gridline.year-start { border-left-color: #e2e8f0; }
+    .gantt-building {
+      padding: 8px 14px; background: #f7f8fa; border-top: 1px solid #eee;
+      font-size: 0.78rem; font-weight: 700; color: #2d3748;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .gantt-today { position: absolute; top: 0; bottom: 0; border-left: 2px solid #e53e3e; z-index: 2; pointer-events: none; }
+    .gantt-head .gantt-today::after {
+      content: 'Today'; position: absolute; top: 1px; left: 3px;
+      font-size: 0.62rem; font-weight: 700; color: #e53e3e;
+    }
+    .gantt-bar {
+      position: absolute; top: 9px; height: 28px; z-index: 1;
+      border: none; border-radius: 6px; cursor: pointer;
+      padding: 0 8px; font-size: 0.74rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left;
+      transition: filter 0.1s, transform 0.1s;
+    }
+    .gantt-bar:hover { filter: brightness(0.95); transform: translateY(-1px); }
+    .gantt-bar.active   { background: #c6f6d5; color: #276749; }
+    .gantt-bar.ending   { background: #fefcbf; color: #975a16; box-shadow: inset 0 0 0 1px #f6e05e; }
+    .gantt-bar.expired  { background: #edf2f7; color: #718096; }
+    .gantt-bar.upcoming { background: #bee3f8; color: #2c5282; }
+    .gantt-gap {
+      position: absolute; top: 9px; height: 28px; border-radius: 6px;
+      background: repeating-linear-gradient(45deg, #fff5f5, #fff5f5 5px, #fed7d7 5px, #fed7d7 10px);
+      cursor: help;
+    }
+
+    /* CONTRACT MODAL */
+    #contract-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    #contract-modal.open { display: flex; }
+    #contract-modal-inner {
+      position: relative; background: white; border-radius: 16px;
+      padding: 30px 34px; width: 640px; max-width: 95vw; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    }
+    #contract-modal-close {
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none; font-size: 1.4rem;
+      cursor: pointer; color: #aaa; line-height: 1;
+    }
+    #contract-modal-close:hover { color: #333; }
+    #contract-modal-inner h2 { font-size: 1.15rem; color: #1a1a2e; }
+    #contract-modal-inner h3 {
+      font-size: 0.75rem; font-weight: 700; color: #718096; margin: 20px 0 10px;
+      text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .contract-sub { font-size: 0.82rem; color: #888; margin: 4px 0 16px; }
+    .contract-status { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; margin-left: 6px; }
+    .contract-status.active   { background: #c6f6d5; color: #276749; }
+    .contract-status.ending   { background: #fefcbf; color: #975a16; }
+    .contract-status.expired  { background: #edf2f7; color: #718096; }
+    .contract-status.upcoming { background: #bee3f8; color: #2c5282; }
+    .contract-facts { display: grid; grid-template-columns: 110px 1fr; gap: 8px 14px; font-size: 0.88rem; }
+    .contract-facts dt { color: #999; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.3px; padding-top: 2px; }
+    .contract-facts dd { color: #2d3748; }
+    .contract-facts dd small { color: #888; }
+    .evidence { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+    .evidence-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+    .evidence-head span { font-size: 0.78rem; font-weight: 700; color: #4a5568; }
+    .evidence blockquote {
+      font-family: Georgia, 'Times New Roman', serif; font-size: 0.88rem; color: #2d3748;
+      line-height: 1.55; border-left: 3px solid #90cdf4; padding-left: 10px;
+    }
+    .evidence-page-btn {
+      padding: 3px 10px; font-size: 0.74rem; font-weight: 600;
+      background: white; color: #3182ce; border: 1px solid #90cdf4; border-radius: 5px;
+      box-shadow: 0 2px 0 #63b3ed; cursor: pointer; white-space: nowrap;
+    }
+    .evidence-page-btn:active { box-shadow: none; transform: translateY(2px); }
+    .evidence-canvas { font-size: 0.8rem; color: #888; }
+    .evidence-canvas:not(:empty) { margin-top: 10px; }
+    .evidence-canvas canvas { width: 100%; height: auto; border: 1px solid #eee; border-radius: 6px; display: block; }
+    .contract-file { font-size: 0.78rem; color: #888; margin-top: 14px; word-break: break-word; }
+    .contract-file a { color: #3182ce; }
   </style>
 </head>
 <body>
@@ -530,6 +650,7 @@
     <div class="view-tabs">
       <button class="view-tab active" data-view="summary" onclick="showView('summary')">Monthly Summary</button>
       <button class="view-tab" data-view="log" onclick="showView('log')">Payment Log</button>
+      <button class="view-tab" data-view="contracts" onclick="showView('contracts')">Contracts</button>
     </div>
 
     <!-- MONTHLY SUMMARY VIEW -->
@@ -583,6 +704,19 @@
       </div>
     </div>
 
+    <!-- CONTRACTS VIEW -->
+    <div id="contracts-view">
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#c6f6d5"></div> Active</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fefcbf"></div> Ending within 60 days</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#bee3f8"></div> Upcoming</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#edf2f7"></div> Expired</div>
+        <div class="legend-item"><div class="legend-dot" style="background:repeating-linear-gradient(45deg,#fff5f5,#fff5f5 3px,#fed7d7 3px,#fed7d7 6px)"></div> No contract</div>
+        <div class="legend-item" style="color:#999">Click a bar to see the contract evidence</div>
+      </div>
+      <div id="contracts-content"><div class="contracts-empty">Loading contracts…</div></div>
+    </div>
+
   </div><!-- /main-content -->
 </div><!-- /app -->
 
@@ -620,6 +754,14 @@
     <div class="form-row"><label>Receipt Image</label><input type="file" id="upload-file" accept="image/*" /></div>
     <div id="upload-error"></div>
     <button id="upload-submit" onclick="submitUpload()">Save Payment</button>
+  </div>
+</div>
+
+<!-- CONTRACT MODAL -->
+<div id="contract-modal" onclick="closeContractModal(event)">
+  <div id="contract-modal-inner">
+    <button id="contract-modal-close" onclick="closeContractModal()">&times;</button>
+    <div id="contract-modal-body"></div>
   </div>
 </div>
 
@@ -703,6 +845,7 @@
         document.getElementById('app').style.display = 'block';
         loadDriveFiles();
         fetchSheetData();
+        fetchContracts();
       }
     });
     tokenClient.requestAccessToken();
@@ -769,6 +912,7 @@
   function showView(view) {
     document.getElementById('summary-view').style.display = view === 'summary' ? 'block' : 'none';
     document.getElementById('log-view').style.display = view === 'log' ? 'block' : 'none';
+    document.getElementById('contracts-view').style.display = view === 'contracts' ? 'block' : 'none';
     document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
   }
 
@@ -991,7 +1135,7 @@
 
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); closeContractModal(); } });
 
   async function openImgModal(raw, caption, rowIndex, existingComment) {
     modalRowIndex = rowIndex || null;
@@ -1255,6 +1399,274 @@
       errEl.style.display = 'block';
       submitBtn.textContent = 'Save Changes';
       submitBtn.disabled = false;
+    }
+  }
+
+  // ── CONTRACTS ────────────────────────────────────────────────────────────────
+
+  // Contract details live in the private "Contracts" tab of the sheet, never in this file
+  const CONTRACTS_RANGE = 'Contracts!A1:Z200';
+  const DAY_MS = 86400000;
+  let contracts = [];
+  let pdfDocCache = {};
+  let pdfJsPromise = null;
+
+  function escHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
+  function parseContractDate(s) {
+    if (!s) return null;
+    // Sheets serial date (days since 1899-12-30), as returned with dateTimeRenderOption=SERIAL_NUMBER
+    if (/^\d{5}(\.\d+)?$/.test(s)) return new Date(1899, 11, 30 + Math.floor(+s));
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+    m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return new Date(+m[3], +m[1] - 1, +m[2]);
+    const d = new Date(s);
+    return isNaN(d) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  function fmtDate(d) { return `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`; }
+  function fmtPeso(n) { return '₱' + Math.round(n).toLocaleString(); }
+
+  function todayDate() { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); }
+
+  function contractStatus(c, today) {
+    if (c._end < today) return 'expired';
+    if (c._start > today) return 'upcoming';
+    return (c._end - today) / DAY_MS <= 60 ? 'ending' : 'active';
+  }
+
+  const STATUS_LABELS = { active: 'Active', ending: 'Ending soon', expired: 'Expired', upcoming: 'Upcoming' };
+
+  async function fetchContracts() {
+    const el = document.getElementById('contracts-content');
+    try {
+      // Raw values so dates don't depend on the sheet's locale display format
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(CONTRACTS_RANGE)}?valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (res.status === 400) {
+        el.innerHTML = `<div class="contracts-empty">
+          <strong>No "Contracts" tab found in your Google Sheet.</strong><br>
+          In the sheet, go to <code>File → Import → Upload</code>, choose <code>contracts.csv</code>,
+          pick <code>Insert new sheet(s)</code>, then rename the new tab to <code>Contracts</code> and reload this page.
+        </div>`;
+        return;
+      }
+      if (!res.ok) throw new Error(`Failed to fetch contracts: ${res.status}`);
+      const data = await res.json();
+      const [headers = [], ...rows] = data.values || [];
+      contracts = rows.map(row => {
+        const c = {};
+        headers.forEach((h, j) => c[String(h).trim()] = String(row[j] ?? '').trim());
+        c._start = parseContractDate(c.start_date);
+        c._end   = parseContractDate(c.end_date);
+        c._rent  = parseFloat((c.monthly_rent || '').replace(/[^0-9.]/g, '')) || 0;
+        return c;
+      }).filter(c => c.property && c._start && c._end);
+      contracts.forEach((c, i) => c._i = i);
+      renderContractsGantt();
+    } catch (err) {
+      el.innerHTML = `<div class="contracts-empty">Error loading contracts: ${escHtml(err.message)}</div>`;
+    }
+  }
+
+  function renderContractsGantt() {
+    const el = document.getElementById('contracts-content');
+    if (!contracts.length) {
+      el.innerHTML = '<div class="contracts-empty">The "Contracts" tab has no contracts yet.</div>';
+      return;
+    }
+    const today = todayDate();
+    const minStart = new Date(Math.min(...contracts.map(c => c._start)));
+    const maxEnd   = new Date(Math.max(...contracts.map(c => c._end), today));
+    const rangeStart = new Date(minStart.getFullYear(), minStart.getMonth(), 1);
+    const rangeEnd   = new Date(maxEnd.getFullYear(), maxEnd.getMonth() + 1, 1);
+    const pct = d => (d - rangeStart) / (rangeEnd - rangeStart) * 100;
+
+    const months = [];
+    for (let d = rangeStart; d < rangeEnd; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) months.push(d);
+    const monthEdges = months.map(d => ({ d, left: pct(d), width: pct(new Date(d.getFullYear(), d.getMonth() + 1, 1)) - pct(d) }));
+    const gridlines = monthEdges.map(m => `<div class="gantt-gridline${m.d.getMonth() === 0 ? ' year-start' : ''}" style="left:${m.left}%"></div>`).join('');
+    const todayLine = `<div class="gantt-today" style="left:${pct(today)}%"></div>`;
+
+    const header = monthEdges.map((m, i) => {
+      const label = m.d.getMonth() === 0 ? `’${String(m.d.getFullYear()).slice(2)}` : MONTHS[m.d.getMonth()][0];
+      return `<div class="gantt-month${m.d.getMonth() === 0 ? ' year-start' : ''}" style="left:${m.left}%;width:${m.width}%">${label}</div>`;
+    }).join('');
+
+    // building → property → contracts (sorted by start)
+    const groups = {};
+    contracts.forEach(c => {
+      const b = c.building || 'Other';
+      (groups[b] = groups[b] || {});
+      (groups[b][c.property] = groups[b][c.property] || []).push(c);
+    });
+
+    const body = Object.keys(groups).sort().map(building => {
+      const rows = Object.keys(groups[building]).sort().map(prop => {
+        const list = groups[building][prop].sort((a, b) => a._start - b._start);
+
+        // Hatched spans where the property had no contract: between contracts, and after the last one ended
+        const gaps = [];
+        list.forEach((c, i) => {
+          const next = list[i + 1];
+          const gapStart = new Date(c._end.getTime() + DAY_MS);
+          const gapEnd = next ? next._start : (c._end < today ? today : null);
+          if (gapEnd && gapEnd - gapStart >= DAY_MS) gaps.push({ from: gapStart, to: gapEnd, open: !next });
+        });
+        const gapHtml = gaps.map(g => {
+          const tip = g.open ? `No contract since ${fmtDate(g.from)}` : `No contract from ${fmtDate(g.from)} to ${fmtDate(new Date(g.to - DAY_MS))}`;
+          return `<div class="gantt-gap" style="left:${pct(g.from)}%;width:${pct(g.to) - pct(g.from)}%" title="${escHtml(tip)}"></div>`;
+        }).join('');
+
+        const bars = list.map(c => {
+          const st = contractStatus(c, today);
+          const left = pct(c._start), right = pct(new Date(c._end.getTime() + DAY_MS));
+          const tip = `${c.tenant || 'Tenant'}\n${fmtPeso(c._rent)}/mo · ${fmtDate(c._start)} → ${fmtDate(c._end)}\n${STATUS_LABELS[st]} — click to see the contract evidence`;
+          return `<button class="gantt-bar ${st}" style="left:${left}%;width:${right - left}%" title="${escHtml(tip)}" onclick="openContractModal(${c._i})">${fmtPeso(c._rent)}/mo</button>`;
+        }).join('');
+
+        const current = list.find(c => c._start <= today && c._end >= today);
+        const upcoming = list.find(c => c._start > today);
+        const rentCell = current
+          ? `<div class="gantt-rent">${fmtPeso(current._rent)}/mo<small>until ${fmtDate(current._end)}</small></div>`
+          : upcoming
+            ? `<div class="gantt-rent">${fmtPeso(upcoming._rent)}/mo<small>starts ${fmtDate(upcoming._start)}</small></div>`
+            : `<div class="gantt-rent none">No active contract</div>`;
+
+        const type = list[list.length - 1].property_type;
+        return `<div class="gantt-row">
+          <div class="gantt-label">${escHtml(prop)}${type ? `<small>${escHtml(type)}</small>` : ''}</div>
+          <div class="gantt-track">${gridlines}${gapHtml}${bars}${todayLine}</div>
+          ${rentCell}
+        </div>`;
+      }).join('');
+      return `<div class="gantt-building">${escHtml(building)}</div>${rows}`;
+    }).join('');
+
+    el.innerHTML = `<div class="gantt-scroll"><div class="gantt">
+      <div class="gantt-row gantt-head">
+        <div class="gantt-label">Property</div>
+        <div class="gantt-track">${header}${todayLine}</div>
+        <div class="gantt-rent">Active rent</div>
+      </div>
+      ${body}
+    </div></div>`;
+  }
+
+  function findContractFileId(name) {
+    if (!name) return null;
+    // Scanner filenames can contain narrow no-break spaces; compare with all whitespace collapsed
+    const norm = s => s.toLowerCase().replace(/[\s  ]+/g, ' ').trim();
+    const target = norm(name);
+    const key = Object.keys(driveFileMap).find(k => norm(k) === target);
+    return key ? driveFileMap[key] : null;
+  }
+
+  function openContractModal(i) {
+    const c = contracts[i];
+    if (!c) return;
+    const today = todayDate();
+    const st = contractStatus(c, today);
+    const daysLeft = Math.round((c._end - today) / DAY_MS);
+    const timing = st === 'expired' ? `ended ${-daysLeft} days ago`
+      : st === 'upcoming' ? `starts in ${Math.round((c._start - today) / DAY_MS)} days`
+      : `${daysLeft} days left`;
+    const fileId = findContractFileId(c.pdf_file);
+
+    const evidence = [
+      { label: 'Lease term', page: c.term_page, quote: c.term_quote },
+      { label: 'Rent', page: c.rent_page, quote: c.rent_quote },
+      { label: c.extra_label || 'Other terms', page: c.extra_page, quote: c.extra_quote },
+    ].filter(e => e.quote);
+
+    document.getElementById('contract-modal-body').innerHTML = `
+      <h2>${escHtml(c.property)}<span class="contract-status ${st}">${STATUS_LABELS[st]}</span></h2>
+      <div class="contract-sub">${escHtml(c.building)}${c.property_type ? ' · ' + escHtml(c.property_type) : ''}</div>
+      <dl class="contract-facts">
+        <dt>Tenant</dt><dd>${escHtml(c.tenant) || '—'}</dd>
+        <dt>Term</dt><dd>${fmtDate(c._start)} → ${fmtDate(c._end)} <small>(${timing})</small></dd>
+        <dt>Rent</dt><dd>${fmtPeso(c._rent)}/mo${c.rent_note ? `<br><small>${escHtml(c.rent_note)}</small>` : ''}</dd>
+        ${c.deposit ? `<dt>Deposit</dt><dd>${escHtml(c.deposit)}</dd>` : ''}
+      </dl>
+      <h3>Evidence from the contract</h3>
+      ${evidence.length ? evidence.map((e, k) => `
+        <div class="evidence">
+          <div class="evidence-head">
+            <span>${escHtml(e.label)}${e.page ? ` · page ${escHtml(e.page)}` : ''}</span>
+            ${e.page && fileId ? `<button class="evidence-page-btn" onclick="showContractPage(${i}, ${k}, ${parseInt(e.page) || 1})">Show page</button>` : ''}
+          </div>
+          <blockquote>“${escHtml(e.quote)}”</blockquote>
+          <div class="evidence-canvas" id="evidence-canvas-${k}"></div>
+        </div>`).join('') : '<div class="contract-sub">No evidence recorded for this contract.</div>'}
+      <div class="contract-file">
+        ${c.pdf_file ? `Source: ${escHtml(c.pdf_file)}` : 'No PDF linked.'}
+        ${fileId ? ` · <a href="https://drive.google.com/file/d/${fileId}/view" target="_blank" rel="noopener">Open full PDF</a>`
+          : c.pdf_file ? ' · <em>not found in the Drive folder — upload it to see the pages</em>' : ''}
+      </div>`;
+    document.getElementById('contract-modal').classList.add('open');
+  }
+
+  function closeContractModal(e) {
+    if (e && e.target !== document.getElementById('contract-modal')) return;
+    document.getElementById('contract-modal').classList.remove('open');
+  }
+
+  function loadPdfJs() {
+    if (!pdfJsPromise) {
+      pdfJsPromise = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        s.onload = () => {
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          resolve();
+        };
+        s.onerror = () => { pdfJsPromise = null; reject(new Error('Could not load the PDF viewer.')); };
+        document.head.appendChild(s);
+      });
+    }
+    return pdfJsPromise;
+  }
+
+  function loadContractPdf(fileId) {
+    if (!pdfDocCache[fileId]) {
+      pdfDocCache[fileId] = (async () => {
+        await loadPdfJs();
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!res.ok) throw new Error(`Drive download error ${res.status}`);
+        return pdfjsLib.getDocument({ data: await res.arrayBuffer() }).promise;
+      })();
+      pdfDocCache[fileId].catch(() => { delete pdfDocCache[fileId]; });
+    }
+    return pdfDocCache[fileId];
+  }
+
+  async function showContractPage(i, k, pageNum) {
+    const box = document.getElementById(`evidence-canvas-${k}`);
+    if (box.dataset.shown) { box.innerHTML = ''; delete box.dataset.shown; return; }
+    box.dataset.shown = '1';
+    box.textContent = 'Loading page…';
+    try {
+      const fileId = findContractFileId(contracts[i].pdf_file);
+      if (!fileId) throw new Error('Contract PDF not found in the Drive folder.');
+      const pdf = await loadContractPdf(fileId);
+      const page = await pdf.getPage(Math.min(pageNum, pdf.numPages));
+      const base = page.getViewport({ scale: 1 });
+      const scale = ((box.clientWidth || 560) / base.width) * (window.devicePixelRatio || 1);
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      if (!box.dataset.shown) return;
+      box.innerHTML = '';
+      box.appendChild(canvas);
+    } catch (err) {
+      box.textContent = 'Could not show the page: ' + err.message;
     }
   }
 
