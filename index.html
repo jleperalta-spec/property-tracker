@@ -172,7 +172,7 @@
     }
     .summary-table-wrapper { overflow-x: auto; }
     .summary-table {
-      width: 100%; min-width: 1400px; border-collapse: collapse;
+      width: 100%; min-width: 1040px; border-collapse: collapse;
       font-size: 0.83rem; table-layout: fixed;
     }
     .summary-table thead th {
@@ -182,15 +182,13 @@
       background: var(--surface-2); border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    .summary-table thead th:first-child,
-    .summary-table thead th:nth-child(2) { text-align: left; }
+    .summary-table thead th:first-child { text-align: left; }
 
     .summary-table tbody td {
       padding: 9px 12px; text-align: center;
       border-top: 1px solid var(--border);
     }
     .summary-table tbody td:first-child { text-align: left; font-weight: 600; color: var(--text); }
-    .summary-table tbody td:nth-child(2) { text-align: left; color: var(--muted); font-size: 0.78rem; }
 
     .cell-paid { background: var(--paid-bg); color: var(--paid); font-weight: 600; }
     .cell-flagged { background: var(--overdue-bg); color: var(--overdue); font-weight: 600; cursor: help; }
@@ -355,7 +353,7 @@
     #upload-modal.open, #edit-modal.open { display: flex; }
     #upload-modal-inner, #edit-modal-inner {
       position: relative; background: var(--surface); border-radius: 16px;
-      padding: 36px 40px; width: 420px; max-width: 95vw;
+      padding: 32px 36px; width: 580px; max-width: 95vw;
       max-height: 92vh; overflow-y: auto;
       box-shadow: 0 12px 48px rgba(0,0,0,0.3);
     }
@@ -674,20 +672,20 @@
     .row-menu button:disabled { color: var(--faint); cursor: default; background: none; }
 
     /* PROPERTY DRAWER */
-    #unit-drawer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
-    #unit-drawer .drawer-backdrop {
+    .side-drawer { position: fixed; inset: 0; z-index: 900; pointer-events: none; }
+    .side-drawer .drawer-backdrop {
       position: absolute; inset: 0; background: rgba(14, 17, 23, 0.4);
       opacity: 0; transition: opacity 0.25s ease;
     }
-    #unit-drawer .drawer-panel {
+    .side-drawer .drawer-panel {
       position: absolute; top: 0; right: 0; bottom: 0; width: 520px; max-width: 100vw;
       background: var(--surface); box-shadow: var(--shadow-lg); overflow-y: auto;
       transform: translateX(100%); transition: transform 0.32s cubic-bezier(0.22, 1.2, 0.36, 1);
       padding: 24px 24px 40px;
     }
-    #unit-drawer.open { pointer-events: auto; }
-    #unit-drawer.open .drawer-backdrop { opacity: 1; }
-    #unit-drawer.open .drawer-panel { transform: translateX(0); }
+    .side-drawer.open { pointer-events: auto; }
+    .side-drawer.open .drawer-backdrop { opacity: 1; }
+    .side-drawer.open .drawer-panel { transform: translateX(0); }
     .drawer-close {
       position: absolute; top: 16px; right: 18px; background: none; border: none;
       font-size: 1.4rem; color: var(--subtle); cursor: pointer;
@@ -753,6 +751,125 @@
       .ledger-toolbar > .metric-sub { display: none; }
       #ledger-search { margin-left: 0; min-width: 0; width: 100%; }
       .drawer-kpis { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* DEDUCTIONS & PAYMENT STATEMENTS */
+    .summary-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; }
+    .summary-toolbar .year-tabs, .summary-toolbar .legend { margin-bottom: 0; }
+    .summary-toolbar .legend { margin-left: auto; gap: 12px; font-size: 0.76rem; }
+    .summary-table th:first-child, .summary-table td:first-child { position: sticky; left: 0; z-index: 1; }
+    .summary-table tbody td:first-child { background: var(--surface); }
+    .summary-table .totals-row td:first-child { background: var(--surface-2); }
+    .summary-table thead th { padding: 8px 6px; }
+    .summary-table thead th:first-child, .summary-table tbody td:first-child { padding-left: 16px; }
+    .summary-table tbody td { font-variant-numeric: tabular-nums; }
+    .type-tag {
+      display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; vertical-align: 1px;
+      background: var(--neutral-bg); color: var(--muted); font-size: 0.66rem; font-weight: 600;
+    }
+    .summary-table tbody td.pay-cell { cursor: pointer; position: relative; padding: 7px 6px; line-height: 1.35; }
+    .summary-table tbody td.pay-cell:hover { box-shadow: inset 0 0 0 2px var(--accent-line); }
+    .cell-net { display: block; font-size: 0.7rem; font-weight: 600; color: var(--credit); white-space: nowrap; }
+    .ded-chip {
+      position: absolute; top: 3px; left: 4px; padding: 0 4px; border-radius: 4px; line-height: 1.4;
+      background: var(--credit-bg); color: var(--credit); font-size: 0.62rem; font-weight: 700;
+    }
+    .cell-part { position: absolute; top: 3px; right: 5px; font-size: 0.6rem; font-weight: 500; opacity: 0.6; line-height: 1.4; }
+    .summary-table tbody td.pay-cell.has-mark { padding-top: 17px; }
+    .total-ded { display: block; font-size: 0.68rem; font-weight: 600; color: var(--credit); white-space: nowrap; }
+    .metric.ded .metric-value { color: var(--credit); }
+
+    #deductions-view { display: none; }
+    .tab-count {
+      display: inline-block; margin-left: 5px; padding: 0 6px; border-radius: 99px;
+      background: var(--credit-bg); color: var(--credit); font-size: 0.68rem; font-weight: 700;
+    }
+    .ded-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+    .ded-grid .ledger-card, .ded-list-card { overflow-x: auto; }
+    table.ded-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    table.ded-table th {
+      text-align: left; padding: 8px 12px; font-size: 0.7rem; font-weight: 600; color: var(--subtle);
+      text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    table.ded-table td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+    table.ded-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    table.ded-table td.amt { font-weight: 600; color: var(--credit); }
+    table.ded-table tr.clickable { cursor: pointer; }
+    table.ded-table tr.clickable:hover td { background: var(--accent-soft); }
+    .ded-bar { height: 5px; border-radius: 99px; background: var(--neutral-bg); margin-top: 5px; overflow: hidden; max-width: 260px; }
+    .ded-bar span { display: block; height: 100%; border-radius: 99px; background: var(--credit); }
+    .dtag { display: inline-block; font-size: 0.68rem; font-weight: 600; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+    .dtag.cat { background: var(--credit-bg); color: var(--credit); }
+    .dtag.kind { background: var(--neutral-bg); color: var(--muted); }
+
+    .wf { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; font-size: 0.85rem; }
+    .wf-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 10px 12px; border-top: 1px solid var(--border); }
+    .wf-row:first-child { border-top: none; }
+    .wf-row .amt { white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .wf-row .dtag { margin: 4px 4px 0 0; }
+    .wf-gross { background: var(--paid-bg); color: var(--paid); font-weight: 600; }
+    .wf-ded .amt, .wf-total { color: var(--credit); }
+    .wf-total { background: var(--surface-2); font-weight: 600; font-size: 0.8rem; }
+    .wf-net { background: var(--surface-2); font-weight: 700; color: var(--ink); font-size: 0.94rem; }
+    .recon { margin-top: 10px; padding: 9px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; line-height: 1.4; }
+    .recon.ok { background: var(--paid-bg); color: var(--paid); }
+    .recon.warn { background: var(--waiting-bg); color: var(--waiting); border: 1px solid var(--waiting-line); }
+    .recon.bad { background: var(--overdue-bg); color: var(--overdue); border: 1px solid var(--overdue-line); }
+    .stmt-note { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 0.83rem; line-height: 1.5; white-space: pre-wrap; }
+    .stmt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .sbtn {
+      padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);
+      font-size: 0.83rem; font-weight: 600; color: var(--text); cursor: pointer;
+    }
+    .sbtn:hover { border-color: var(--accent-line); background: var(--accent-soft); }
+    .sbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .sbtn.primary:hover { background: var(--accent); filter: brightness(1.1); }
+
+    .paste-box { background: var(--credit-bg); border: 1px solid #d9cffa; border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+    .paste-box label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--credit); margin-bottom: 6px; }
+    .paste-box textarea {
+      width: 100%; min-height: 70px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.8rem; background: var(--surface); color: var(--text); resize: vertical;
+    }
+    .paste-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; font-size: 0.76rem; color: var(--credit); }
+    .paste-foot button {
+      background: var(--credit); color: #fff; border: none; border-radius: 7px; padding: 6px 12px;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .ded-editor { margin-bottom: 14px; }
+    .ded-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .ded-head span { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .ded-add {
+      background: none; border: 1px solid var(--border); border-radius: 7px; padding: 3px 10px;
+      font-size: 0.76rem; font-weight: 600; color: var(--credit); cursor: pointer;
+    }
+    .ded-add:hover { background: var(--credit-bg); }
+    .ded-row { display: grid; grid-template-columns: minmax(0, 1fr) 168px 100px 24px; gap: 6px; margin-bottom: 6px; }
+    .ded-row input, .ded-row select {
+      width: 100%; min-width: 0; padding: 7px 8px; border: 1px solid var(--border); border-radius: 7px;
+      font-size: 0.82rem; color: var(--text); background: var(--surface);
+    }
+    .ded-row input.amt { text-align: right; }
+    .ded-row button { border: none; background: none; color: var(--overdue); font-size: 1.1rem; cursor: pointer; padding: 0; }
+    .ded-empty { font-size: 0.78rem; color: var(--subtle); padding: 4px 0; }
+    .ded-totals {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 10px; margin-bottom: 14px;
+      background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    }
+    .ded-totals span { display: block; font-size: 0.66rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .ded-totals b { font-size: 0.92rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .ded-totals .t-rent b { color: var(--paid); }
+    .ded-totals .t-ded b { color: var(--credit); }
+    .ded-check { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+    .ded-check.ok { color: var(--paid); }
+    .ded-check.bad { color: var(--overdue); }
+    @media (max-width: 640px) {
+      .ded-grid, .form-grid { grid-template-columns: 1fr; }
+      .ded-row { grid-template-columns: minmax(0, 1fr) 96px 24px; }
+      .ded-row input:first-child { grid-column: 1 / -1; }
+      .summary-toolbar .legend { margin-left: 0; }
+      #upload-modal-inner, #edit-modal-inner { padding: 28px 18px; }
     }
 
     /* CONTRACT MODAL */
@@ -890,6 +1007,7 @@
     <div class="view-tabs">
       <button class="view-tab active" data-view="ledger" onclick="showView('ledger')">Ledger</button>
       <button class="view-tab" data-view="summary" onclick="showView('summary')">Monthly Summary</button>
+      <button class="view-tab" data-view="deductions" onclick="showView('deductions')">Deductions<span class="tab-count" id="ded-tab-count" style="display:none"></span></button>
       <button class="view-tab" data-view="log" onclick="showView('log')">Payment Log</button>
       <button class="view-tab" data-view="contracts" onclick="showView('contracts')">Contracts</button>
     </div>
@@ -912,14 +1030,27 @@
 
     <!-- MONTHLY SUMMARY VIEW -->
     <div id="summary-view" style="display:none">
-      <div class="year-tabs" id="year-tabs"></div>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:var(--paid-bg)"></div> Paid</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--overdue-line)"></div> Flagged / Anomaly</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--waiting-bg)"></div> Amount Unknown</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div> No payment</div>
+      <div class="summary-toolbar">
+        <div class="year-tabs"></div>
+        <div class="chip-group" role="group" aria-label="Amount shown in the grid">
+          <button class="chip active" data-mode="gross" onclick="setSummaryMode('gross')">Rent paid</button>
+          <button class="chip" data-mode="net" onclick="setSummaryMode('net')">Net received</button>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--paid-bg)"></div> Paid</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--credit-bg)"></div> Has deductions</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--overdue-line)"></div> Flagged</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--waiting-bg)"></div> Amount unknown</div>
+        </div>
       </div>
+      <div class="metric-strip" id="summary-metrics"></div>
       <div id="summary-content"></div>
+    </div>
+
+    <!-- DEDUCTIONS VIEW -->
+    <div id="deductions-view">
+      <div class="summary-toolbar"><div class="year-tabs"></div></div>
+      <div id="deductions-content"></div>
     </div>
 
     <!-- PAYMENT LOG VIEW -->
@@ -1002,25 +1133,38 @@
   <div id="upload-modal-inner">
     <button id="upload-modal-close" onclick="closeUploadModal()">&times;</button>
     <h2>Log Payment</h2>
+    <div class="paste-box">
+      <label for="upload-paste">Paste Dennis's breakdown (optional)</label>
+      <textarea id="upload-paste" placeholder="Plus: P231,000 rent Oct 6 2026 to Jan 5 2027&#10;Less: P5,000 service invoice issuance fee&#10;Less: P200 notary fee&#10;Total left: P225,800"></textarea>
+      <div class="paste-foot">
+        <span id="upload-paste-msg"></span>
+        <button type="button" onclick="applyBreakdown()">Read breakdown</button>
+      </div>
+    </div>
     <div class="form-row"><label>Property</label>
       <input type="text" id="upload-property" readonly />
       <select id="upload-property-select" style="display:none" onchange="onUploadPropertyChange()"></select>
       <div class="form-hint" id="upload-expected"></div>
     </div>
-    <div class="form-row"><label>Date Sent</label><input type="date" id="upload-date-sent" /></div>
-    <div class="form-row"><label>Period Start</label><input type="date" id="upload-period-start" /></div>
-    <div class="form-row"><label>Period End</label><input type="date" id="upload-period-end" /></div>
-    <div class="form-row"><label>Months Covered</label><input type="number" id="upload-months" value="1" min="1" /></div>
-    <div class="form-row"><label>Amount (PHP)</label><input type="number" id="upload-amount" placeholder="0.00" step="0.01" min="0" /></div>
-    <div class="form-row"><label>Method</label>
-      <select id="upload-method">
-        <option>NDB Transfer</option>
-        <option>BDO Check</option>
-        <option>GCash</option>
-        <option>Other</option>
-      </select>
+    <div class="form-grid">
+      <div class="form-row"><label>Date Sent</label><input type="date" id="upload-date-sent" /></div>
+      <div class="form-row"><label>Method</label>
+        <select id="upload-method">
+          <option>NDB Transfer</option>
+          <option>BDO Check</option>
+          <option>GCash</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Period Start</label><input type="date" id="upload-period-start" /></div>
+      <div class="form-row"><label>Period End</label><input type="date" id="upload-period-end" /></div>
+      <div class="form-row"><label>Months Covered</label><input type="number" id="upload-months" value="1" min="1" /></div>
+      <div class="form-row"><label>Rent before deductions</label><input type="number" id="upload-gross" placeholder="Blank if nothing deducted" step="0.01" min="0" oninput="updateDedTotals('upload')" /></div>
     </div>
-    <div class="form-row"><label>Notes <span style="text-transform:none;font-weight:400">(optional — e.g. less commission)</span></label><input type="text" id="upload-notes" /></div>
+    <div class="ded-editor" id="upload-ded"></div>
+    <div class="form-row"><label>Amount received (PHP) <span style="text-transform:none;font-weight:400">what actually arrived in the bank</span></label><input type="number" id="upload-amount" placeholder="0.00" step="0.01" min="0" oninput="updateDedTotals('upload')" /></div>
+    <div class="ded-totals" id="upload-ded-totals" style="display:none"></div>
+    <div class="form-row"><label>Notes <span style="text-transform:none;font-weight:400">(optional)</span></label><input type="text" id="upload-notes" /></div>
     <div class="form-row"><label>Receipt Image <span style="text-transform:none;font-weight:400">(optional)</span></label><input type="file" id="upload-file" accept="image/*" /></div>
     <div id="upload-error"></div>
     <button id="upload-submit" onclick="submitUpload()">Save Payment</button>
@@ -1028,11 +1172,20 @@
 </div>
 
 <!-- PROPERTY DRAWER -->
-<div id="unit-drawer" aria-hidden="true">
+<div id="unit-drawer" class="side-drawer" aria-hidden="true">
   <div class="drawer-backdrop" onclick="closeUnitDrawer()"></div>
   <aside class="drawer-panel" role="dialog" aria-label="Property details">
     <button class="drawer-close" onclick="closeUnitDrawer()" aria-label="Close">&times;</button>
     <div id="unit-drawer-body"></div>
+  </aside>
+</div>
+
+<!-- PAYMENT STATEMENT DRAWER -->
+<div id="stmt-drawer" class="side-drawer" aria-hidden="true">
+  <div class="drawer-backdrop" onclick="closeStatement()"></div>
+  <aside class="drawer-panel" role="dialog" aria-label="Payment statement">
+    <button class="drawer-close" onclick="closeStatement()" aria-label="Close">&times;</button>
+    <div id="stmt-drawer-body"></div>
   </aside>
 </div>
 
@@ -1058,7 +1211,11 @@
     <div class="form-row"><label>Period Start</label><input type="date" id="edit-period-start" /></div>
     <div class="form-row"><label>Period End</label><input type="date" id="edit-period-end" /></div>
     <div class="form-row"><label>Months Covered</label><input type="number" id="edit-months" min="1" /></div>
-    <div class="form-row"><label>Amount (PHP)</label><input type="number" id="edit-amount" step="0.01" /></div>
+    <div class="form-row"><label>Rent before deductions</label><input type="number" id="edit-gross" placeholder="Blank if nothing deducted" step="0.01" min="0" oninput="updateDedTotals('edit')" /></div>
+    <div class="ded-editor" id="edit-ded"></div>
+    <input type="hidden" id="edit-deductions-json" />
+    <div class="form-row"><label>Amount received (PHP)</label><input type="number" id="edit-amount" step="0.01" oninput="updateDedTotals('edit')" /></div>
+    <div class="ded-totals" id="edit-ded-totals" style="display:none"></div>
     <div class="form-row"><label>Notes</label><input type="text" id="edit-notes" /></div>
     <div id="edit-error"></div>
     <button id="edit-submit" onclick="submitEdit()">Save Changes</button>
@@ -1093,7 +1250,7 @@
 <script>
   const CLIENT_ID = '223524951828-rrglgv01p1rb12g6a3r05ho7ejmqdpsg.apps.googleusercontent.com';
   const SHEET_ID  = '1EOUcwJgaAn1ltRGJf44fmT7etCIuW1tyubFMWy7-bo8';
-  const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z200';
+  const SHEET_RANGE = 'Helen_Rent_Payments!A1:Z';
   const DRIVE_FOLDER_ID = '16sSUzdAB2DxafPNsHie20VQqdMhCRFuw';
   const GEMINI_API_KEY = 'AIzaSyC7LFFqDOTpy3w3ov0uTC9isw-VW3wRA4U';
   const AI_ENABLED = false;
@@ -1195,6 +1352,7 @@
   function showView(view) {
     document.getElementById('ledger-view').style.display = view === 'ledger' ? 'block' : 'none';
     document.getElementById('summary-view').style.display = view === 'summary' ? 'block' : 'none';
+    document.getElementById('deductions-view').style.display = view === 'deductions' ? 'block' : 'none';
     document.getElementById('log-view').style.display = view === 'log' ? 'block' : 'none';
     document.getElementById('contracts-view').style.display = view === 'contracts' ? 'block' : 'none';
     document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
@@ -1206,14 +1364,15 @@
     const years = [...new Set(allRows.map(r => r.date_sent?.slice(0,4)).filter(Boolean))]
       .map(Number).sort((a,b) => b - a);
 
-    const container = document.getElementById('year-tabs');
-    container.innerHTML = years.map(y => {
+    const html = years.map(y => {
       const archived = y < 2026;
       return `<button class="year-tab ${archived ? 'archived' : ''} ${y === selectedYear ? 'active' : ''}"
         data-year="${y}" onclick="selectYear(${y})">
         ${y}${archived ? ' — Archived' : ''}
       </button>`;
     }).join('');
+    // The Monthly Summary and Deductions tabs share the selected year
+    document.querySelectorAll('.year-tabs').forEach(c => c.innerHTML = html);
   }
 
   function selectYear(year) {
@@ -1259,8 +1418,8 @@
       const monthKeys = getPaymentMonths(row);
       if (!monthKeys.length) return;
 
-      const totalAmt = row.amount_php !== '' ? parseFloat(row.amount_php) : null;
-      const perMonth = totalAmt !== null ? totalAmt / monthKeys.length : null;
+      const money = rowMoney(row);
+      const n = monthKeys.length;
       const isUnknown = row.flagged === 'AMOUNT UNKNOWN';
 
       if (!data[row.building]) data[row.building] = {};
@@ -1270,13 +1429,25 @@
 
       const imgUrls = row.source_image ? row.source_image.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-      monthKeys.forEach(mk => {
+      monthKeys.forEach((mk, idx) => {
         if (!data[row.building][row.property_id].months[mk]) {
-          data[row.building][row.property_id].months[mk] = { amount: 0, flagged: null, unknown: false, notes: [], images: [], primaryRowIndex: null, existingComment: '', hasComments: false };
+          data[row.building][row.property_id].months[mk] = { amount: 0, gross: 0, ded: 0, dedItems: 0, stmtRow: null, stmtItemised: false, part: '', flagged: null, unknown: false, notes: [], images: [], primaryRowIndex: null, existingComment: '', hasComments: false };
         }
         const cell = data[row.building][row.property_id].months[mk];
+        // amount = net received, gross = rent paid before deductions; both spread evenly over the months covered
         if (isUnknown) cell.unknown = true;
-        else if (perMonth !== null) cell.amount += perMonth;
+        else if (money.net !== null) {
+          cell.amount += money.net / n;
+          cell.gross += money.gross / n;
+          cell.ded += Math.max(0, money.gross - money.net) / n;
+          cell.dedItems += money.items.length;
+        }
+        if (!cell.stmtRow || (money.itemised && !cell.stmtItemised)) { cell.stmtRow = row._rowIndex; cell.stmtItemised = money.itemised; }
+        if (n > 1) {
+          cell.part = `${idx + 1}/${n}`;
+          if (money.gross !== null) cell.notes.push(`Month ${idx + 1} of a ${n}-month payment of ${fmtPeso2(money.gross)}`);
+        }
+        if (money.items.length) cell.notes.push('Deducted: ' + money.items.map(d => `${d.label || catLabel(d.cat)} ${fmtPeso2(d.amount)}`).join(', '));
         if (row.flagged && !isUnknown) cell.flagged = row.flagged;
         if (row.deduction_notes) cell.notes.push('Deductions: ' + row.deduction_notes);
         if (row.notes) cell.notes.push('Notes: ' + row.notes);
@@ -1294,6 +1465,7 @@
     const container = document.getElementById('summary-content');
     const data = buildSummaryData();
     const today = new Date();
+    const grossMode = summaryMode === 'gross';
 
     const monthCols = Array.from({length: 12}, (_, i) => ({
       key: `${selectedYear}-${String(i+1).padStart(2,'0')}`,
@@ -1317,35 +1489,37 @@
             : `<button class="flag-btn" onclick="openUploadModal('${safeB}','${safeP}','${col.key}','${safePT}')">Delayed</button>`;
           if (!cell) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
           if (cell.unknown) return `<td class="cell-unknown${futureCls}" title="Amount not captured">?</td>`;
-          if (cell.amount === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
-          const amt = '₱' + Math.round(cell.amount).toLocaleString();
-          const tip = cell.notes.length ? ` title="${cell.notes.filter(Boolean).join(' | ')}"` : '';
+          if (cell.amount === 0 && cell.gross === 0 && !cell.flagged) return `<td class="cell-empty${futureCls}">${emptyContent}</td>`;
+          const hasDed = cell.ded > 0.5;
+          const amt = fmtPeso(grossMode ? cell.gross : cell.amount);
+          const second = hasDed ? `<span class="cell-net">${grossMode ? 'net ' + fmtPeso(cell.amount) : 'of ' + fmtPeso(cell.gross)}</span>` : '';
+          const chip = hasDed ? `<span class="ded-chip">−${cell.dedItems || ''}</span>` : '';
+          const part = cell.part ? `<span class="cell-part">${cell.part}</span>` : '';
+          const tip = cell.notes.length ? ` title="${escHtml(cell.notes.filter(Boolean).join(' | '))}"` : '';
           const escapedComment = (cell.existingComment || '').replace(/'/g,"\\'").replace(/\n/g,' ');
           const receiptBtn = cell.images.length
-            ? `<br><button class="receipt-btn" onclick="openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}',${cell.primaryRowIndex},'${escapedComment}')">Receipt</button>`
+            ? `${second ? '' : '<br>'}<button class="receipt-btn" onclick="event.stopPropagation(); openImgModal('${cell.images[0].replace(/'/g,"\\'")}','${propId} ${col.key}',${cell.primaryRowIndex},'${escapedComment}')">Receipt</button>`
             : '';
           const commentDot = cell.hasComments ? '<span class="cell-has-comments" title="Has comments"></span>' : '';
-          if (cell.flagged) return `<td class="cell-flagged${futureCls}"${tip}>${amt}${commentDot}${receiptBtn}</td>`;
-          return `<td class="cell-paid${futureCls}"${tip}>${amt}${commentDot}${receiptBtn}</td>`;
+          return `<td class="${cell.flagged ? 'cell-flagged' : 'cell-paid'} pay-cell${part || chip ? ' has-mark' : ''}${futureCls}"${tip} onclick="openStatement(${cell.stmtRow})">${part}${chip}${amt}${commentDot}${second}${receiptBtn}</td>`;
         }).join('');
 
         return `<tr>
-          <td>${propId}</td>
-          <td>${prop.type || '—'}</td>
+          <td>${propId}${prop.type ? `<span class="type-tag">${escHtml(prop.type)}</span>` : ''}</td>
           ${cells}
         </tr>`;
       }).join('');
 
       const totalCells = monthCols.map(col => {
-        let total = 0; let hasAny = false; let hasUnknown = false;
+        let total = 0; let ded = 0; let hasAny = false; let hasUnknown = false;
         properties.forEach(p => {
           const cell = data[building][p].months[col.key];
-          if (cell) { hasAny = true; total += cell.amount; if (cell.unknown) hasUnknown = true; }
+          if (cell) { hasAny = true; total += grossMode ? cell.gross : cell.amount; ded += cell.ded; if (cell.unknown) hasUnknown = true; }
         });
         const futureCls = col.isFuture ? ' cell-future' : '';
         if (!hasAny) return `<td class="cell-empty${futureCls}">—</td>`;
         if (hasUnknown && total === 0) return `<td class="cell-unknown${futureCls}">?</td>`;
-        return `<td${futureCls ? ` class="${futureCls.trim()}"` : ''}>₱${Math.round(total).toLocaleString()}</td>`;
+        return `<td${futureCls ? ` class="${futureCls.trim()}"` : ''}>${fmtPeso(total)}${ded > 0.5 ? `<span class="total-ded" title="Deducted this month">−${fmtPeso(ded)}</span>` : ''}</td>`;
       }).join('');
 
       return `<div class="building-summary">
@@ -1354,15 +1528,14 @@
           <table class="summary-table">
             <thead>
               <tr>
-                <th style="text-align:left;width:140px">Property</th>
-                <th style="text-align:left;width:100px">Type</th>
+                <th style="text-align:left;width:150px">Property</th>
                 ${monthCols.map(c => `<th class="${c.isFuture ? 'cell-future' : ''}">${c.label}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
               ${bodyRows}
               <tr class="totals-row">
-                <td colspan="2">Total</td>
+                <td>${grossMode ? 'Total rent' : 'Total net'}</td>
                 ${totalCells}
               </tr>
             </tbody>
@@ -1370,6 +1543,38 @@
         </div>
       </div>`;
     }).join('');
+
+    // Year totals for the cards above the grid
+    let yGross = 0, yNet = 0, yDed = 0;
+    buildings.forEach(b => Object.values(data[b]).forEach(prop => Object.entries(prop.months).forEach(([mk, cell]) => {
+      if (!mk.startsWith(String(selectedYear))) return;
+      yGross += cell.gross; yNet += cell.amount; yDed += cell.ded;
+    })));
+    const pct = yGross ? (yDed / yGross * 100).toFixed(1) : '0';
+    document.getElementById('summary-metrics').innerHTML = `
+      <div class="metric" style="min-height:0">
+        <div class="metric-label">Rent paid · ${selectedYear}</div>
+        <div class="metric-value">${fmtPeso(yGross)}</div>
+        <div class="metric-sub">What tenants paid for ${selectedYear}, before anything was taken out</div>
+      </div>
+      <div class="metric ded" style="min-height:0">
+        <div class="metric-label">Deducted</div>
+        <div class="metric-value">${yDed > 0.5 ? '−' + fmtPeso(yDed) : '₱0'} <small>${pct}% of rent</small></div>
+        <div class="metric-sub">Only counts payments logged with a breakdown. See the Deductions tab</div>
+      </div>
+      <div class="metric" style="min-height:0">
+        <div class="metric-label">Net received</div>
+        <div class="metric-value">${fmtPeso(yNet)}</div>
+        <div class="metric-sub">What actually arrived in the bank</div>
+      </div>`;
+    renderDeductionsView();
+  }
+
+  let summaryMode = 'gross';
+  function setSummaryMode(mode) {
+    summaryMode = mode;
+    document.querySelectorAll('#summary-view .chip').forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+    renderMonthlySummary();
   }
 
   // ── PAYMENT LOG ──────────────────────────────────────────────────────────────
@@ -1419,7 +1624,13 @@
 
   // ── IMAGE MODAL ──────────────────────────────────────────────────────────────
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeImgModal(); closeUploadModal(); closeEditModal(); closeContractModal(); closeUnitDrawer(); closeRowMenus(); } });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    // A form open on top of the statement closes first; the statement stays
+    const formOpen = document.querySelector('#upload-modal.open, #edit-modal.open, #img-modal.open');
+    closeImgModal(); closeUploadModal(); closeEditModal(); closeContractModal(); closeUnitDrawer(); closeRowMenus();
+    if (!formOpen) closeStatement();
+  });
 
   async function openImgModal(raw, caption, rowIndex, existingComment) {
     modalRowIndex = rowIndex || null;
@@ -1497,6 +1708,11 @@
     document.getElementById('upload-period-end').value   = opts.periodEnd || `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
     document.getElementById('upload-months').value = '1';
     document.getElementById('upload-amount').value = opts.amount || '';
+    document.getElementById('upload-gross').value = '';
+    document.getElementById('upload-paste').value = '';
+    document.getElementById('upload-paste-msg').textContent = 'Plus / Less lines become the rows below. You can edit them before saving.';
+    dedState.upload = [];
+    renderDedEditor('upload');
     document.getElementById('upload-expected').textContent = opts.hint || '';
     document.getElementById('upload-method').value = 'NDB Transfer';
     document.getElementById('upload-notes').value = '';
@@ -1515,7 +1731,10 @@
 
   async function submitUpload() {
     const file      = document.getElementById('upload-file').files[0];
-    const amount    = document.getElementById('upload-amount').value.trim();
+    let amount      = document.getElementById('upload-amount').value.trim();
+    let gross       = document.getElementById('upload-gross').value.trim();
+    const dedJson   = serializeDeds(dedState.upload);
+    const ded       = dedTotal(dedJson ? JSON.parse(dedJson) : []);
     const dateSent  = document.getElementById('upload-date-sent').value;
     const pStart    = document.getElementById('upload-period-start').value;
     const pEnd      = document.getElementById('upload-period-end').value;
@@ -1527,12 +1746,17 @@
 
     errEl.style.display = 'none';
     if (!uploadContext.propId) { errEl.textContent = 'Please choose a property.'; errEl.style.display = 'block'; return; }
-    if (!amount) { errEl.textContent = 'Please enter an amount.'; errEl.style.display = 'block'; return; }
+    // Either side of the sum can be left blank: rent − deductions = amount received
+    if (!amount && gross) amount = String(round2(parseFloat(gross) - ded));
+    if (!amount) { errEl.textContent = 'Please enter the amount received.'; errEl.style.display = 'block'; return; }
+    if (dedJson && !gross) gross = String(round2(parseFloat(amount) + ded));
+    if (gross && !dedJson && Math.abs(parseFloat(gross) - parseFloat(amount)) < 0.005) gross = '';
 
     submitBtn.textContent = file ? 'Uploading…' : 'Saving…';
     submitBtn.disabled = true;
 
     try {
+      if (gross || dedJson) await ensureColumns(['gross_php', 'deductions_json']);
       if (file) {
         const fileId = await uploadToDrive(file);
         driveFileMap[file.name.toLowerCase()] = fileId;
@@ -1547,6 +1771,8 @@
         period_end:    pEnd,
         months_covered: months,
         amount_php:    amount,
+        gross_php:     gross,
+        deductions_json: dedJson,
         payment_method: method,
         notes:         notes,
         source_image:  file ? file.name : '',
@@ -1629,6 +1855,8 @@
     period_end:     'edit-period-end',
     months_covered: 'edit-months',
     amount_php:     'edit-amount',
+    gross_php:      'edit-gross',
+    deductions_json: 'edit-deductions-json',
     notes:          'edit-notes',
   };
   let editRowIndex = null;
@@ -1645,6 +1873,12 @@
       // Date/number inputs blank out values they can't parse — remember what was shown
       editInitialValues[field] = input.value;
     });
+    // Deductions are edited as rows and written back as JSON through the hidden field
+    dedState.edit = rowDeductions(row);
+    const dedInput = document.getElementById('edit-deductions-json');
+    dedInput.value = serializeDeds(dedState.edit);
+    editInitialValues.deductions_json = dedInput.value;
+    renderDedEditor('edit');
     document.getElementById('edit-error').style.display = 'none';
     document.getElementById('edit-submit').textContent = 'Save Changes';
     document.getElementById('edit-submit').disabled = false;
@@ -1667,20 +1901,25 @@
       errEl.textContent = 'Please enter an amount.'; errEl.style.display = 'block'; return;
     }
 
-    // Only write cells that actually changed, so untouched columns keep their formatting
-    const data = [];
-    Object.entries(EDIT_FIELDS).forEach(([field, id]) => {
-      const value = document.getElementById(id).value.trim();
-      if (value === editInitialValues[field].trim()) return;
-      const colIdx = sheetHeaders.indexOf(field);
-      if (colIdx === -1) return;
-      data.push({ range: `Helen_Rent_Payments!${colIndexToLetter(colIdx)}${editRowIndex}`, values: [[value]] });
-    });
-    if (!data.length) { closeEditModal(); return; }
+    document.getElementById('edit-deductions-json').value = serializeDeds(dedState.edit);
+    const changed = Object.entries(EDIT_FIELDS)
+      .map(([field, id]) => ({ field, value: document.getElementById(id).value.trim() }))
+      .filter(c => c.value !== editInitialValues[c.field].trim());
+    if (!changed.length) { closeEditModal(); return; }
 
     submitBtn.textContent = 'Saving…';
     submitBtn.disabled = true;
     try {
+      if (changed.some(c => c.field === 'gross_php' || c.field === 'deductions_json')) {
+        await ensureColumns(['gross_php', 'deductions_json']);
+      }
+      // Only write cells that actually changed, so untouched columns keep their formatting
+      const data = [];
+      changed.forEach(({ field, value }) => {
+        const colIdx = sheetHeaders.indexOf(field);
+        if (colIdx === -1) return;
+        data.push({ range: `Helen_Rent_Payments!${colIndexToLetter(colIdx)}${editRowIndex}`, values: [[value]] });
+      });
       const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchUpdate`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
@@ -1690,6 +1929,7 @@
       closeEditModal();
       await fetchSheetData();
       applyFilters();
+      if (stmtRowIndex) openStatement(stmtRowIndex);
     } catch (err) {
       errEl.textContent = 'Failed: ' + err.message;
       errEl.style.display = 'block';
@@ -1701,7 +1941,7 @@
   // ── CONTRACTS ────────────────────────────────────────────────────────────────
 
   // Contract details live in the private "Contracts" tab of the sheet, never in this file
-  const CONTRACTS_RANGE = 'Contracts!A1:Z200';
+  const CONTRACTS_RANGE = 'Contracts!A1:Z';
   const DAY_MS = 86400000;
   let contracts = [];
   let pdfDocCache = {};
@@ -2306,7 +2546,7 @@
         amount: contract._rent,
         periodStart: isoDate(start),
         periodEnd: isoDate(end),
-        hint: `Contract rent ${fmtPeso(contract._rent)}/mo. Enter what Helen actually received; deductions are tracked automatically.`,
+        hint: `Contract rent ${fmtPeso(contract._rent)}/mo. Enter what Helen actually received, and list anything Dennis deducted.`,
       };
     }
     return out;
@@ -2339,10 +2579,369 @@
     const t = todayDate();
     const p = paymentPrefill(u, t.getFullYear(), t.getMonth() + 1);
     uploadContext = { building: p.building, propId: p.propId, monthKey: p.mk, propType: p.type };
+    document.getElementById('upload-expected').textContent = p.opts.hint || 'No contract on file for this property.';
+    // Keep what a pasted breakdown already filled in
+    if (dedState.upload.length || document.getElementById('upload-gross').value) return;
     if (p.opts.amount) document.getElementById('upload-amount').value = p.opts.amount;
     if (p.opts.periodStart) document.getElementById('upload-period-start').value = p.opts.periodStart;
     if (p.opts.periodEnd) document.getElementById('upload-period-end').value = p.opts.periodEnd;
-    document.getElementById('upload-expected').textContent = p.opts.hint || 'No contract on file for this property.';
+  }
+
+  // ── DEDUCTIONS ───────────────────────────────────────────────────────────────
+
+  // A payment is a statement: rent paid (gross_php) − itemised deductions (deductions_json) = amount received
+  // (amount_php). Both extra columns are optional, so older rows keep working as plain amounts.
+  // "lease" marks costs charged once per lease rather than as they come up.
+  const DEDUCTION_CATS = [
+    { key: 'commission', label: 'Commission / management fee', lease: true,  match: /commi|\bcom\b|mgt|mgmt|manage|broker/i },
+    { key: 'notary',     label: 'Notary / legal',              lease: true,  match: /notar|legal|attorney/i },
+    { key: 'tax',        label: 'Tax / invoice fee',           lease: true,  match: /invoice|tax|\bvat\b|\bbir\b/i },
+    { key: 'delivery',   label: 'Delivery',                    lease: false, match: /lalamove|deliver|courier|shipping|grab/i },
+    { key: 'repairs',    label: 'Repairs & purchases',         lease: false, match: /repair|aircon|plumb|paint|mattress|\bbed\b|furnitur|replace|clean|install|purchase|bought|leak|request/i },
+    { key: 'other',      label: 'Other',                       lease: false, match: null },
+  ];
+  const dedState = { upload: [], edit: [] };
+  let stmtRowIndex = null;
+
+  function catOf(key) { return DEDUCTION_CATS.find(c => c.key === key) || DEDUCTION_CATS[DEDUCTION_CATS.length - 1]; }
+  function catLabel(key) { return catOf(key).label; }
+  function guessCat(label) { return (DEDUCTION_CATS.find(c => c.match && c.match.test(label)) || catOf('other')).key; }
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function fmtPeso2(n) {
+    return '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: Math.abs(n % 1) > 0.004 ? 2 : 0, maximumFractionDigits: 2 });
+  }
+  function numVal(id) {
+    const v = document.getElementById(id).value.trim();
+    return v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v);
+  }
+  function dedTotal(items) { return round2(items.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0)); }
+
+  function rowDeductions(r) {
+    try {
+      const list = JSON.parse(r.deductions_json || '[]');
+      if (!Array.isArray(list)) return [];
+      return list.filter(d => d && parseFloat(d.amount) > 0)
+        .map(d => ({ label: String(d.label || ''), cat: catOf(d.cat).key, amount: parseFloat(d.amount) }));
+    } catch { return []; }
+  }
+
+  function serializeDeds(items) {
+    const clean = items
+      .map(d => ({ label: String(d.label || '').trim(), cat: catOf(d.cat).key, amount: round2(parseFloat(d.amount) || 0) }))
+      .filter(d => d.amount > 0);
+    return clean.length ? JSON.stringify(clean) : '';
+  }
+
+  // net = what arrived, gross = rent paid before deductions, gap = part of the difference no line item explains
+  function rowMoney(r) {
+    const items = rowDeductions(r);
+    const ded = dedTotal(items);
+    const g = String(r.gross_php ?? '').replace(/[^0-9.\-]/g, '');
+    const statedGross = g === '' ? null : parseFloat(g);
+    let net = rowAmount(r);
+    if (net === null && statedGross !== null) net = round2(statedGross - ded);
+    const gross = statedGross !== null ? statedGross : (net === null ? null : round2(net + ded));
+    const gap = gross === null ? 0 : round2(gross - ded - net);
+    return { items, ded, net, gross, gap, itemised: items.length > 0 || Math.abs(gap) > 0.5 };
+  }
+
+  // Adds the deduction columns to the sheet's header row the first time they are needed
+  async function ensureColumns(names) {
+    const missing = names.filter(n => !sheetHeaders.includes(n));
+    if (!missing.length) return;
+    const start = sheetHeaders.length;
+    if (start + missing.length > 26) throw new Error('The sheet has no free column before Z for the deduction details.');
+    const range = encodeURIComponent(`Helen_Rent_Payments!${colIndexToLetter(start)}1:${colIndexToLetter(start + missing.length - 1)}1`);
+    const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?valueInputOption=RAW`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [missing] })
+    });
+    if (!res.ok) throw new Error(`Could not add the deduction columns to the sheet: ${res.status}`);
+    sheetHeaders = [...sheetHeaders, ...missing];
+  }
+
+  // ── Deduction rows editor (shared by the Log Payment and Edit Payment forms) ──
+
+  function renderDedEditor(scope) {
+    const items = dedState[scope];
+    const options = cat => DEDUCTION_CATS.map(c => `<option value="${c.key}" ${c.key === cat ? 'selected' : ''}>${c.label}</option>`).join('');
+    document.getElementById(`${scope}-ded`).innerHTML = `
+      <div class="ded-head"><span>Deductions</span><button type="button" class="ded-add" onclick="addDedRow('${scope}')">+ Add deduction</button></div>
+      ${items.length ? items.map((d, i) => `<div class="ded-row">
+        <input type="text" placeholder="What was it for?" aria-label="Deduction description" value="${escHtml(d.label)}" oninput="dedState.${scope}[${i}].label = this.value" />
+        <select aria-label="Category" onchange="dedState.${scope}[${i}].cat = this.value">${options(d.cat)}</select>
+        <input class="amt" type="number" step="0.01" min="0" placeholder="0.00" aria-label="Amount deducted" value="${d.amount ?? ''}" oninput="dedState.${scope}[${i}].amount = this.value; updateDedTotals('${scope}')" />
+        <button type="button" aria-label="Remove deduction" onclick="removeDedRow('${scope}', ${i})">&times;</button>
+      </div>`).join('') : '<div class="ded-empty">Nothing deducted. Add a row for each fee or expense Dennis took out.</div>'}`;
+    updateDedTotals(scope);
+  }
+
+  function addDedRow(scope) {
+    dedState[scope].push({ label: '', cat: 'other', amount: '' });
+    renderDedEditor(scope);
+    const rows = document.querySelectorAll(`#${scope}-ded .ded-row`);
+    rows[rows.length - 1].querySelector('input').focus();
+  }
+
+  function removeDedRow(scope, i) {
+    dedState[scope].splice(i, 1);
+    renderDedEditor(scope);
+  }
+
+  // Live check that rent − deductions = amount received
+  function updateDedTotals(scope) {
+    const el = document.getElementById(`${scope}-ded-totals`);
+    const gross = numVal(`${scope}-gross`), net = numVal(`${scope}-amount`);
+    const ded = dedTotal(dedState[scope]);
+    if (!ded && gross === null) { el.style.display = 'none'; return; }
+    const rent = gross !== null ? gross : (net !== null ? round2(net + ded) : null);
+    let check = '<div class="ded-check">Enter the amount received to check the sum.</div>';
+    if (gross !== null && net !== null) {
+      const gap = round2(gross - ded - net);
+      check = Math.abs(gap) < 0.5
+        ? '<div class="ded-check ok">Adds up: rent minus deductions equals the amount received ✓</div>'
+        : `<div class="ded-check bad">Off by ${fmtPeso2(Math.abs(gap))}: rent minus deductions is ${fmtPeso2(gross - ded)}, but ${fmtPeso2(net)} was received.</div>`;
+    } else if (net !== null) {
+      check = `<div class="ded-check">Rent before deductions works out to ${fmtPeso2(rent)}.</div>`;
+    }
+    el.style.display = '';
+    el.innerHTML = `
+      <div class="t-rent"><span>Rent paid</span><b>${rent === null ? '—' : fmtPeso2(rent)}</b></div>
+      <div class="t-ded"><span>Deducted</span><b>−${fmtPeso2(ded)}</b></div>
+      <div><span>Should arrive</span><b>${rent === null ? '—' : fmtPeso2(rent - ded)}</b></div>
+      ${check}`;
+  }
+
+  // ── Broker breakdown parser ──
+
+  // Reads a pasted message like "Plus: P231,000 rent Oct 6 2026 to Jan 5 2027 / Less: P200 notary fee / Total left: P106,027.50"
+  function parseBreakdown(text) {
+    const out = { gross: null, net: null, items: [], periodStart: '', periodEnd: '', months: null, title: '' };
+    const moneyRe = /(?:₱|\bphp\.?|\bp)\s*(\d[\d,]*(?:\.\d+)?)/i;
+    String(text || '').split(/\r?\n/).forEach(raw => {
+      const line = raw.trim().replace(/^[\d]+[.)]\s*/, '').replace(/^[•*]\s*/, '');
+      if (!line) return;
+      const kind = /^(plus|add)\b/i.test(line) ? 'plus'
+        : /^(less|minus|deduct\w*)\b/i.test(line) || /^[-−–]\s*\D?\s*\d/.test(line) ? 'less'
+        : /^(total|net|balance|remaining|amount (left|received))\b/i.test(line) ? 'net' : null;
+      const body = line.replace(/^[a-z ]*?:\s*/i, '').replace(/^[-−–]\s*/, '');
+      const m = body.match(moneyRe) || (kind ? body.match(/()(\d[\d,]{2,}(?:\.\d+)?)/) : null);
+      if (!kind || !m) { if (!kind && !out.title) out.title = line; return; }
+      const amount = parseFloat((m[2] || m[1]).replace(/,/g, ''));
+      if (!(amount > 0)) return;
+      const after = body.slice(m.index + m[0].length).replace(/^[\s:\-–]+/, '').trim();
+      const label = after || body.slice(0, m.index).replace(/[\s:\-–]+$/, '').trim();
+      if (kind === 'net') out.net = amount;
+      else if (kind === 'less') out.items.push({ label, cat: guessCat(label), amount });
+      else {
+        out.gross = round2((out.gross || 0) + amount);
+        const dates = [...label.matchAll(/([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})/g)].map(d => {
+          const mi = MONTHS.findIndex(mm => mm.toLowerCase() === d[1].slice(0, 3).toLowerCase());
+          return mi === -1 ? null : new Date(parseInt(d[3]), mi, parseInt(d[2]));
+        }).filter(Boolean);
+        if (dates.length >= 2 && dates[1] > dates[0]) {
+          out.periodStart = isoDate(dates[0]);
+          out.periodEnd = isoDate(dates[1]);
+          out.months = Math.max(1, Math.round((dates[1] - dates[0]) / DAY_MS / 30.44));
+        }
+      }
+    });
+    return out;
+  }
+
+  function applyBreakdown() {
+    const msg = document.getElementById('upload-paste-msg');
+    const p = parseBreakdown(document.getElementById('upload-paste').value);
+    if (p.gross === null && !p.items.length) {
+      msg.textContent = 'No Plus / Less lines found. Each line needs to start with Plus or Less and include an amount.';
+      return;
+    }
+    // In "new payment" mode, pick the property when the message's first line names exactly one
+    const sel = document.getElementById('upload-property-select');
+    if (sel.style.display !== 'none' && !uploadContext.propId && p.title) {
+      const tokens = digitTokens(p.title);
+      const hits = portfolio.map((u, i) => i).filter(i => [portfolio[i].name, ...portfolio[i].payIds].some(n => digitTokens(n).some(t => tokens.includes(t))));
+      if (hits.length === 1) { sel.value = String(hits[0]); onUploadPropertyChange(); }
+    }
+    const ded = dedTotal(p.items);
+    dedState.upload = p.items;
+    if (p.gross !== null) document.getElementById('upload-gross').value = p.gross;
+    const net = p.net !== null ? p.net : (p.gross !== null ? round2(p.gross - ded) : null);
+    if (net !== null) document.getElementById('upload-amount').value = net;
+    if (p.periodStart) {
+      document.getElementById('upload-period-start').value = p.periodStart;
+      document.getElementById('upload-period-end').value = p.periodEnd;
+      document.getElementById('upload-months').value = p.months;
+    }
+    renderDedEditor('upload');
+    msg.textContent = `Read ${p.gross !== null ? fmtPeso2(p.gross) + ' rent and ' : ''}${p.items.length} deduction${p.items.length === 1 ? '' : 's'}. Check the rows below before saving.`;
+  }
+  document.getElementById('upload-paste').addEventListener('paste', () => setTimeout(applyBreakdown, 0));
+
+  // ── Payment statement drawer ──
+
+  function openStatement(rowIndex) {
+    const r = allRows.find(x => x._rowIndex === rowIndex);
+    if (!r) return;
+    stmtRowIndex = rowIndex;
+    const m = rowMoney(r);
+    const months = getPaymentMonths(r);
+    const start = parseContractDate(r.period_start);
+    const unit = portfolio.find(u => u.payIds.has(r.property_id));
+    const contract = unit && start ? [...unit.contracts].reverse().find(c => c._start <= start && c._end >= start) : null;
+    const expected = contract ? contract._rent * Math.max(1, months.length) : null;
+    const period = r.period_start ? `${escHtml(r.period_start)}${r.period_end ? ' → ' + escHtml(r.period_end) : ''}` : 'Period not recorded';
+
+    let waterfall, recon = '';
+    if (m.net === null) {
+      waterfall = '<div class="wf"><div class="wf-row wf-net"><span>Amount received</span><span class="amt">Unknown</span></div></div>';
+      recon = '<div class="recon warn">The amount for this payment was never captured. Use Edit to add it.</div>';
+    } else if (!m.itemised) {
+      waterfall = `<div class="wf"><div class="wf-row wf-net"><span>Amount received</span><span class="amt">${fmtPeso2(m.net)}</span></div></div>`;
+      if (expected !== null && expected - m.net > 1) {
+        recon = `<div class="recon warn">${fmtPeso2(expected - m.net)} less than the contract rent of ${fmtPeso2(expected)} for this period, and no breakdown is recorded. Use Edit to list what was deducted.</div>`;
+      } else if (expected !== null) {
+        recon = '<div class="recon ok">Matches the contract rent, nothing deducted ✓</div>';
+      }
+    } else {
+      const pct = m.gross ? ((m.gross - m.net) / m.gross * 100).toFixed(1) : '0';
+      waterfall = `<div class="wf">
+        <div class="wf-row wf-gross"><span>Rent paid by tenant</span><span class="amt">${fmtPeso2(m.gross)}</span></div>
+        ${m.items.map(d => `<div class="wf-row wf-ded">
+          <span>${escHtml(d.label || catLabel(d.cat))}<br><span class="dtag cat">${catLabel(d.cat)}</span><span class="dtag kind">${catOf(d.cat).lease ? 'Once per lease' : 'As it came up'}</span></span>
+          <span class="amt">−${fmtPeso2(d.amount)}</span></div>`).join('')}
+        ${Math.abs(m.gap) > 0.5 ? `<div class="wf-row wf-ded"><span>Not itemised</span><span class="amt">−${fmtPeso2(m.gap)}</span></div>` : ''}
+        <div class="wf-row wf-total"><span>Total deducted (${pct}% of rent)</span><span class="amt">−${fmtPeso2(m.gross - m.net)}</span></div>
+        <div class="wf-row wf-net"><span>Net received</span><span class="amt">${fmtPeso2(m.net)}</span></div>
+      </div>`;
+      recon = Math.abs(m.gap) < 0.5
+        ? `<div class="recon ok">Adds up: rent minus deductions equals the ${fmtPeso2(m.net)} received ✓</div>`
+        : `<div class="recon bad">${fmtPeso2(Math.abs(m.gap))} is not explained. Rent minus the listed deductions is ${fmtPeso2(m.gross - m.ded)}, but ${fmtPeso2(m.net)} was received.</div>`;
+      if (expected !== null && Math.abs(m.gross - expected) > 1) {
+        recon += `<div class="recon warn">Rent paid differs from the contract: ${fmtPeso2(expected)} expected for ${months.length || 1} month${months.length > 1 ? 's' : ''}.</div>`;
+      }
+    }
+
+    const spread = months.length > 1 && m.net !== null
+      ? `<div class="metric-sub" style="margin-top:10px">Spread over <b>${months.length} months</b> (${months.map(mk => MONTHS[parseInt(mk.slice(5)) - 1]).join(', ')}): ${fmtPeso2(m.gross / months.length)}/mo rent${m.itemised ? `, <b>${fmtPeso2(m.net / months.length)}/mo</b> net` : ''}.</div>`
+      : '';
+    const notes = [r.notes, m.items.length ? '' : r.deduction_notes, r.comments].filter(Boolean).join('\n');
+    const images = (r.source_image || '').split(',').map(s => s.trim()).filter(Boolean);
+    const caption = `${r.property_id} ${r.date_sent}`.replace(/'/g, "\\'");
+    const comment = (r.comments || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+
+    document.getElementById('stmt-drawer-body').innerHTML = `
+      <h2>${escHtml([r.building, r.property_id].filter(Boolean).join(' '))}</h2>
+      <div class="contract-sub">Payment statement · ${period}${months.length > 1 ? ` · ${months.length} months` : ''}</div>
+      <div class="drawer-kpis">
+        <div class="drawer-kpi"><div>Received on</div><div style="font-size:0.9rem">${escHtml(r.date_sent) || '—'}</div></div>
+        <div class="drawer-kpi"><div>Method</div><div style="font-size:0.9rem">${escHtml(r.payment_method) || '—'}</div></div>
+        <div class="drawer-kpi"><div>Contract rent</div><div style="font-size:0.9rem">${contract ? fmtPeso(contract._rent) + '/mo' : '—'}</div></div>
+      </div>
+      ${contract?.tenant ? `<div class="metric-sub" style="margin-top:10px">Tenant: <b>${escHtml(contract.tenant)}</b></div>` : ''}
+      <h3>Where the money went</h3>
+      ${waterfall}
+      ${spread}
+      ${recon}
+      ${notes ? `<h3>Notes</h3><div class="stmt-note">${escHtml(notes)}</div>` : ''}
+      <div class="stmt-actions">
+        <button class="sbtn primary" onclick="openEditModal(${r._rowIndex})">${m.itemised ? 'Edit payment' : 'Edit / add deductions'}</button>
+        ${images.map((img, i) => `<button class="sbtn" onclick="openImgModal('${img.replace(/'/g, "\\'")}', '${caption}', ${r._rowIndex}, '${comment}')">View receipt${images.length > 1 ? ' ' + (i + 1) : ''}</button>`).join('')}
+      </div>`;
+    const drawer = document.getElementById('stmt-drawer');
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeStatement() {
+    const drawer = document.getElementById('stmt-drawer');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    stmtRowIndex = null;
+  }
+
+  // ── Deductions tab: where the money went for the selected year ──
+
+  function renderDeductionsView() {
+    const year = String(selectedYear);
+    const pays = allRows
+      .filter(r => r.property_id && String(r.date_sent || r.period_start || '').startsWith(year))
+      .map(r => ({ r, m: rowMoney(r) }))
+      .filter(p => p.m.net !== null);
+    const itemised = pays.filter(p => p.m.itemised);
+    const lines = [];
+    itemised.forEach(({ r, m }) => {
+      m.items.forEach(d => lines.push({ r, label: d.label || catLabel(d.cat), cat: d.cat, lease: catOf(d.cat).lease, amount: d.amount }));
+      if (m.gap > 0.5) lines.push({ r, label: 'Not itemised', cat: 'other', lease: false, amount: m.gap });
+    });
+    const total = lines.reduce((s, l) => s + l.amount, 0);
+    const gross = pays.reduce((s, p) => s + p.m.gross, 0);
+    const leaseTotal = lines.filter(l => l.lease).reduce((s, l) => s + l.amount, 0);
+
+    const badge = document.getElementById('ded-tab-count');
+    badge.style.display = lines.length ? '' : 'none';
+    badge.textContent = lines.length;
+
+    const el = document.getElementById('deductions-content');
+    if (!lines.length) {
+      el.innerHTML = `<div class="ledger-card"><div class="ledger-empty">No itemised deductions for ${year} yet.<br>
+        Log a payment and paste Dennis's breakdown, or open a paid month in Monthly Summary and choose Edit to list what was deducted.</div></div>`;
+      return;
+    }
+
+    const bar = (v, max) => `<div class="ded-bar"><span style="width:${max ? Math.max(1, v / max * 100) : 0}%"></span></div>`;
+    const cats = DEDUCTION_CATS.map(c => {
+      const ls = lines.filter(l => l.cat === c.key);
+      return { ...c, count: ls.length, amount: ls.reduce((s, l) => s + l.amount, 0) };
+    }).filter(c => c.count).sort((a, b) => b.amount - a.amount);
+    const props = new Map();
+    pays.forEach(({ r, m }) => {
+      const key = [r.building, r.property_id].filter(Boolean).join(' ');
+      const p = props.get(key) || { name: key, gross: 0, ded: 0 };
+      p.gross += m.gross; p.ded += m.itemised ? Math.max(0, m.gross - m.net) : 0;
+      props.set(key, p);
+    });
+    const propRows = [...props.values()].sort((a, b) => b.ded - a.ded || a.name.localeCompare(b.name));
+    const maxProp = Math.max(...propRows.map(p => p.ded));
+
+    el.innerHTML = `
+      <div class="metric-strip">
+        <div class="metric ded" style="min-height:0">
+          <div class="metric-label">Total deducted · ${year}</div>
+          <div class="metric-value">−${fmtPeso2(total)} <small>${gross ? (total / gross * 100).toFixed(1) : 0}% of rent paid</small></div>
+          <div class="metric-sub">${lines.length} item${lines.length === 1 ? '' : 's'} across ${itemised.length} payment${itemised.length === 1 ? '' : 's'}, by the date each payment was sent</div>
+        </div>
+        <div class="metric" style="min-height:0">
+          <div class="metric-label">Once per lease</div>
+          <div class="metric-value">${fmtPeso2(leaseTotal)}</div>
+          <div class="metric-sub">Commission, notary and invoice fees charged when a lease starts or renews</div>
+        </div>
+        <div class="metric" style="min-height:0">
+          <div class="metric-label">As it came up</div>
+          <div class="metric-value">${fmtPeso2(total - leaseTotal)}</div>
+          <div class="metric-sub">Repairs, purchases, delivery and anything else</div>
+        </div>
+      </div>
+      <div class="ded-grid">
+        <div class="ledger-card"><h3>By category</h3>
+          <table class="ded-table"><thead><tr><th>Category</th><th class="num">Items</th><th class="num">Share</th><th class="num">Amount</th></tr></thead><tbody>
+          ${cats.map(c => `<tr><td><b>${c.label}</b>${bar(c.amount, total)}</td><td class="num">${c.count}</td>
+            <td class="num">${(c.amount / total * 100).toFixed(1)}%</td><td class="num amt">${fmtPeso2(c.amount)}</td></tr>`).join('')}
+          </tbody></table></div>
+        <div class="ledger-card"><h3>By property</h3>
+          <table class="ded-table"><thead><tr><th>Property</th><th class="num">Rent paid</th><th class="num">Deducted %</th><th class="num">Deducted</th></tr></thead><tbody>
+          ${propRows.map(p => `<tr><td><b>${escHtml(p.name)}</b>${bar(p.ded, maxProp)}</td><td class="num">${fmtPeso(p.gross)}</td>
+            <td class="num">${p.gross ? (p.ded / p.gross * 100).toFixed(1) : '0.0'}%</td><td class="num ${p.ded ? 'amt' : ''}">${fmtPeso2(p.ded)}</td></tr>`).join('')}
+          </tbody></table></div>
+      </div>
+      <div class="ledger-card ded-list-card"><h3>Every deduction<span>Click a line to open the payment it came out of</span></h3>
+        <table class="ded-table"><thead><tr><th>Sent</th><th>Property</th><th>What for</th><th>Category</th><th>Type</th><th class="num">Amount</th></tr></thead><tbody>
+        ${lines.sort((a, b) => String(a.r.date_sent).localeCompare(String(b.r.date_sent))).map(l => `<tr class="clickable" onclick="openStatement(${l.r._rowIndex})">
+          <td class="num" style="text-align:left">${escHtml(l.r.date_sent)}</td><td><b>${escHtml([l.r.building, l.r.property_id].filter(Boolean).join(' '))}</b></td>
+          <td>${escHtml(l.label)}</td><td><span class="dtag cat">${catLabel(l.cat)}</span></td>
+          <td><span class="dtag kind">${l.lease ? 'Once per lease' : 'As it came up'}</span></td><td class="num amt">−${fmtPeso2(l.amount)}</td></tr>`).join('')}
+        </tbody></table></div>`;
   }
 
   // ── PROPERTY DRAWER ──────────────────────────────────────────────────────────
